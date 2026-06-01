@@ -18,12 +18,10 @@
     <ng-container matColumnDef="omschrijving">
       <th mat-header-cell *matHeaderCellDef>{{ labels.inkoopbron.colOmschrijving }}</th>
       <td mat-cell *matCellDef="let row">
-        <mat-form-field appearance="outline" class="cell-field">
-          <input matInput
-                 [(ngModel)]="row.omschrijving"
-                 [disabled]="row.markedDeleted"
-                 [attr.aria-label]="labels.inkoopbron.colOmschrijving" />
-        </mat-form-field>
+        <input class="ledger-input"
+               [(ngModel)]="row.omschrijving"
+               [disabled]="row.markedDeleted"
+               [attr.aria-label]="labels.inkoopbron.colOmschrijving" />
       </td>
     </ng-container>
 

@@ -1,0 +1,85 @@
+<section class="ledger">
+  <header class="masthead">
+    <div class="masthead__top">
+      <p class="masthead__meta">
+        <span class="edition">{{ nl.editie }} — {{ editieJaar }}</span>
+        <span class="dot">·</span>
+        <span class="kicker">{{ nl.ondertitel }}</span>
+      </p>
+      <a class="action" routerLink="/instrumenten/nieuw">
+        <span class="action__plus">+</span>{{ nl.nieuwInstrument }}
+      </a>
+    </div>
+    <h1 class="masthead__title">
+      {{ nl.masthead }}<span class="masthead__mark"></span>
+    </h1>
+    <div class="rule rule--double"></div>
+  </header>
+
+  @if (loading()) {
+    <p class="loading">— registratie inladen —</p>
+  } @else {
+    <div class="kpis">
+      @for (kpi of kpis(); track kpi.label; let i = $index) {
+        <div
+          class="kpi"
+          [class.kpi--accent]="kpi.accent"
+          [style.animation-delay.ms]="i * 70"
+        >
+          <span class="kpi__value">{{ kpi.value }}</span>
+          <span class="kpi__label">{{ kpi.label }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="cols">
+      <section class="col col--recent">
+        <h2 class="col__head">{{ nl.recent }}</h2>
+        @if (recent().length === 0) {
+          <p class="empty">{{ nl.geenRecent }}</p>
+        } @else {
+          <ul class="entries">
+            @for (row of recent(); track row.id; let i = $index) {
+              <li class="entry" [style.animation-delay.ms]="220 + i * 55">
+                <a class="entry__link" [routerLink]="['/instrumenten', row.id]">
+                  <span class="entry__no">{{ formatIndex(i) }}</span>
+                  <span class="entry__name">
+                    {{ row.type }}@if (row.maat) {<span class="entry__maat"> · {{ row.maat }}</span>}
+                  </span>
+                  <span class="entry__leader" aria-hidden="true"></span>
+                  <span class="entry__date">{{ row.datum }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="col col--quick">
+        <h2 class="col__head">{{ nl.snel }}</h2>
+        <nav class="quick">
+          <a class="quick__link" routerLink="/instrumenten">
+            <span class="arrow" aria-hidden="true">→</span>{{ nl.linkInstrumenten }}
+          </a>
+          <a class="quick__link" routerLink="/instrumenten/nieuw">
+            <span class="arrow" aria-hidden="true">→</span>{{ nl.linkNieuw }}
+          </a>
+          <a class="quick__link" routerLink="/types">
+            <span class="arrow" aria-hidden="true">→</span>{{ nl.linkTypes }}
+          </a>
+          <a class="quick__link" routerLink="/inkoopbron">
+            <span class="arrow" aria-hidden="true">→</span>{{ nl.linkBronnen }}
+          </a>
+        </nav>
+        <p class="footnote">
+          <span class="footnote__n">{{ bronnenAantal() }}</span>{{ nl.bronnen }}
+        </p>
+      </section>
+    </div>
+
+    <footer class="colophon">
+      <div class="rule"></div>
+      <span>{{ nl.masthead }} · {{ nl.editie }} — {{ editieJaar }}</span>
+    </footer>
+  }
+</section>

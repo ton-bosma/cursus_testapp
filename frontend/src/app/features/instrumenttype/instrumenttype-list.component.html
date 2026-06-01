@@ -18,34 +18,32 @@
     <ng-container matColumnDef="omschrijving">
       <th mat-header-cell *matHeaderCellDef>{{ labels.instrumenttype.colOmschrijving }}</th>
       <td mat-cell *matCellDef="let row">
-        <mat-form-field appearance="outline" class="cell-field">
-          <input matInput
-                 [(ngModel)]="row.omschrijving"
-                 [disabled]="row.markedDeleted"
-                 [attr.aria-label]="labels.instrumenttype.colOmschrijving" />
-        </mat-form-field>
+        <input class="ledger-input"
+               [(ngModel)]="row.omschrijving"
+               [disabled]="row.markedDeleted"
+               [attr.aria-label]="labels.instrumenttype.colOmschrijving" />
       </td>
     </ng-container>
 
     <!-- Forfait accessoires column -->
     <ng-container matColumnDef="forfaitAccessoires">
-      <th mat-header-cell *matHeaderCellDef>{{ labels.instrumenttype.colForfaitAccessoires }}</th>
+      <th mat-header-cell *matHeaderCellDef class="head--num">
+        {{ labels.instrumenttype.colForfaitAccessoires }}
+      </th>
       <td mat-cell *matCellDef="let row" class="cell--num">
-        <mat-form-field appearance="outline" class="cell-field cell-field--num">
-          <input matInput
-                 type="number"
-                 class="num"
-                 [(ngModel)]="row.forfaitAccessoires"
-                 [disabled]="row.markedDeleted"
-                 [attr.aria-label]="labels.instrumenttype.colForfaitAccessoires" />
-        </mat-form-field>
+        <input class="ledger-input ledger-input--num"
+               type="number"
+               step="0.01"
+               [(ngModel)]="row.forfaitAccessoires"
+               [disabled]="row.markedDeleted"
+               [attr.aria-label]="labels.instrumenttype.colForfaitAccessoires" />
       </td>
     </ng-container>
 
     <!-- Actions column -->
     <ng-container matColumnDef="acties">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let row">
+      <th mat-header-cell *matHeaderCellDef class="head--act"></th>
+      <td mat-cell *matCellDef="let row" class="cell--act">
         <button mat-icon-button
                 color="warn"
                 (click)="deleteRow(row)"

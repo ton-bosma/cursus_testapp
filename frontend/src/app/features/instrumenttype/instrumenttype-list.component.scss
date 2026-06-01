@@ -8,32 +8,29 @@
 // ── Page wrapper ────────────────────────────────────────────────
 .types-page {
   display: block;
-  max-width: 860px;
+  max-width: 760px;
 }
 
 // ── Inline edit table ───────────────────────────────────────────
 .inline-table {
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
-// Forfait column: right-align the numeric cell content
-.cell--num {
+// Numeric column: right-aligned header + cell (forfait accessoires)
+.head--num,
+.cell--num { text-align: right; }
+
+.cell--num .ledger-input { max-width: 150px; margin-left: auto; }
+
+// Actions column: tight, right
+.head--act,
+.cell--act {
+  width: 56px;
   text-align: right;
 }
 
-.cell-field {
-  width: 100%;
-  margin: 4px 0;
-}
-
-// Make the forfait input column narrower and numerals monospaced
-.cell-field--num {
-  max-width: 160px;
-}
-
 // ── Deleted-row styling ─────────────────────────────────────────
-// Rows marked for deletion are shown struck through in ink-soft.
 .row--deleted {
   opacity: 0.45;
   color: var(--ink-soft);

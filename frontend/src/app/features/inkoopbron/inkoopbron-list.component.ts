@@ -8,8 +8,6 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,8 +36,6 @@ interface IInkoopbronRow extends IInkoopbron {
   imports: [
     FormsModule,
     MatTableModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatCheckboxModule,
     MatButtonModule,
     MatIconModule,

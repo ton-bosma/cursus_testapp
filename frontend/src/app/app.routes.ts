@@ -3,7 +3,10 @@ import { Routes } from '@angular/router';
 export const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'instrumenten',
+    loadComponent: () =>
+      import('./features/dashboard/dashboard.component').then(
+        (m) => m.DashboardComponent,
+      ),
     pathMatch: 'full',
   },
   {
@@ -43,6 +46,6 @@ export const appRoutes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'instrumenten',
+    redirectTo: '',
   },
 ];
