@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -85,6 +93,14 @@ export class InstrumentDetailComponent implements OnInit {
   @Input() public nested = false;
 
   protected readonly labels = NL.instrumentDetail;
+
+  /** Uppercase masthead meta line (local UI string; not shared i18n). */
+  protected readonly metaLine = 'REGISTER · INSTRUMENT';
+
+  /** Masthead title: "new" until a row is persisted, then "edit". */
+  protected readonly title = computed(() =>
+    this.currentId() === undefined ? this.labels.titelNieuw : this.labels.titelBewerken,
+  );
 
   protected readonly types = signal<readonly IInstrumentType[]>([]);
   protected readonly bronnen = signal<readonly IInkoopbron[]>([]);

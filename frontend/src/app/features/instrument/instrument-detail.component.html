@@ -2,18 +2,30 @@
   <mat-progress-bar mode="indeterminate" />
 }
 
+<header class="ledger-head detail-head">
+  <p class="ledger-head__meta">{{ metaLine }}</p>
+  <div class="ledger-head__row">
+    <h1 class="ledger-head__title">
+      {{ title() }}<span class="ledger-head__title-mark"></span>
+    </h1>
+  </div>
+  <div class="ledger-rule ledger-rule--double"></div>
+</header>
+
 <form class="detail" [formGroup]="form" (ngSubmit)="save()">
   <mat-accordion multi>
     <!-- Panel: In -->
     <mat-expansion-panel expanded>
       <mat-expansion-panel-header>
-        <mat-panel-title>{{ labels.panelIn }}</mat-panel-title>
+        <mat-panel-title>
+          <span class="ledger-label">{{ labels.panelIn }}</span>
+        </mat-panel-title>
       </mat-expansion-panel-header>
 
       <div class="fields">
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.datumIn }}</mat-label>
-          <input matInput type="date" formControlName="datumIn" />
+          <input matInput class="num" type="date" formControlName="datumIn" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -32,7 +44,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.huurnr }}</mat-label>
-          <input matInput type="number" formControlName="huurnr" />
+          <input matInput class="num" type="number" formControlName="huurnr" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -42,27 +54,27 @@
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.inkoopInstr }}</mat-label>
-          <input matInput type="text" inputmode="decimal" appCurrency formControlName="inkoopInstr" />
+          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="inkoopInstr" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.inkoopAcc }}</mat-label>
-          <input matInput type="text" inputmode="decimal" appCurrency formControlName="inkoopAcc" />
+          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="inkoopAcc" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.idAdresIn }}</mat-label>
-          <input matInput type="number" formControlName="idAdresIn" />
+          <input matInput class="num" type="number" formControlName="idAdresIn" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.idAdresTaxateur }}</mat-label>
-          <input matInput type="number" formControlName="idAdresTaxateur" />
+          <input matInput class="num" type="number" formControlName="idAdresTaxateur" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.datumTaxatie }}</mat-label>
-          <input matInput type="date" formControlName="datumTaxatie" />
+          <input matInput class="num" type="date" formControlName="datumTaxatie" />
         </mat-form-field>
       </div>
 
@@ -79,28 +91,30 @@
     <!-- Panel: Uit -->
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title>{{ labels.panelUit }}</mat-panel-title>
+        <mat-panel-title>
+          <span class="ledger-label">{{ labels.panelUit }}</span>
+        </mat-panel-title>
       </mat-expansion-panel-header>
 
       <div class="fields">
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.datumUit }}</mat-label>
-          <input matInput type="date" formControlName="datumUit" />
+          <input matInput class="num" type="date" formControlName="datumUit" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.verkoopInstr }}</mat-label>
-          <input matInput type="text" inputmode="decimal" appCurrency formControlName="verkoopInstr" />
+          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="verkoopInstr" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.idAdresUit }}</mat-label>
-          <input matInput type="number" formControlName="idAdresUit" />
+          <input matInput class="num" type="number" formControlName="idAdresUit" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.verkoopBtw }}</mat-label>
-          <input matInput type="text" inputmode="decimal" appCurrency formControlName="verkoopBtw" />
+          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="verkoopBtw" />
         </mat-form-field>
       </div>
     </mat-expansion-panel>
@@ -108,7 +122,9 @@
     <!-- Panel: Instrument -->
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title>{{ labels.panelInstrument }}</mat-panel-title>
+        <mat-panel-title>
+          <span class="ledger-label">{{ labels.panelInstrument }}</span>
+        </mat-panel-title>
       </mat-expansion-panel-header>
 
       <div class="fields">
@@ -128,7 +144,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>{{ labels.velden.anno }}</mat-label>
-          <input matInput type="number" formControlName="anno" />
+          <input matInput class="num" type="number" formControlName="anno" />
         </mat-form-field>
 
         <mat-checkbox formControlName="antique">{{ labels.velden.antique }}</mat-checkbox>
@@ -147,14 +163,14 @@
   </mat-accordion>
 
   <div class="form-actions">
-    <button type="submit" mat-raised-button color="primary" [disabled]="saving()">
+    <button type="submit" mat-flat-button color="primary" [disabled]="saving()">
       {{ labels.btnOpslaan }}
     </button>
     @if (nested) {
       <button
         type="button"
-        mat-stroked-button
-        color="warn"
+        mat-button
+        class="action-delete"
         [disabled]="currentId() === undefined"
         (click)="delete()"
       >

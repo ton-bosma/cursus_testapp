@@ -19,15 +19,30 @@ export interface IConfirmOverwriteData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatDialogModule, MatButtonModule],
   template: `
-    <h2 mat-dialog-title>{{ labels.overschrijfTitel }}</h2>
-    <mat-dialog-content>{{ data.message }}</mat-dialog-content>
+    <h2 mat-dialog-title class="confirm-title">{{ labels.overschrijfTitel }}</h2>
+    <mat-dialog-content class="confirm-body">{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button [mat-dialog-close]="false">{{ labels.btnNee }}</button>
-      <button mat-raised-button color="primary" [mat-dialog-close]="true">
+      <button mat-flat-button color="primary" [mat-dialog-close]="true">
         {{ labels.btnJa }}
       </button>
     </mat-dialog-actions>
   `,
+  styles: [
+    `
+      .confirm-title {
+        font-family: var(--font-display);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .confirm-body {
+        font-family: var(--font-body);
+        color: var(--ink);
+      }
+    `,
+  ],
 })
 export class ConfirmOverwriteDialog {
   protected readonly labels = NL.instrumentDetail;
