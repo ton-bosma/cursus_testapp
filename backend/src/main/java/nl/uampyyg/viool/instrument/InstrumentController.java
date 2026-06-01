@@ -1,6 +1,9 @@
 package nl.uampyyg.viool.instrument;
 
+import java.util.List;
+
 import nl.uampyyg.viool.instrument.dto.InstrumentRow;
+import nl.uampyyg.viool.instrument.dto.InstrumentSearchRow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,22 +14,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
 /**
- * REST endpoints for single-instrument CRUD.
+ * REST endpoints for instrument search and CRUD.
  *
  * <ul>
+ *   <li>{@code GET /api/instrument} — multi-term search with archive filter
+ *       and max-results ({@code ?q=&archief=&max=}).</li>
  *   <li>{@code GET /api/instrument/{id}} — fetch one instrument (404 if absent).</li>
  *   <li>{@code PUT /api/instrument} — insert (no id) or update (id present),
  *       returning the persisted row.</li>
  *   <li>{@code DELETE /api/instrument/{id}} — delete, 204 on success
  *       (404 if absent).</li>
  * </ul>
- *
- * <p>Multi-term search lives in a separate endpoint/ticket and is intentionally
- * not implemented here.
  */
 @RestController
 @RequestMapping("/api/instrument")
@@ -40,6 +43,31 @@ public class InstrumentController
    public InstrumentController(InstrumentService service)
    {
       this.service = service;
+   }
+
+
+   /**
+    * Multi-term search on instruments.
+    *
+    * <p>The query parameter {@code q} is split on whitespace; all terms must
+    * match (AND). By default only active instruments ({@code datum_uit IS NULL})
+    * are returned; pass {@code archief=true} to include archived ones.
+    * The {@code max} parameter limits the result set (10/20/50/100;
+    * omit or pass {@code -1} for unlimited).
+    *
+    * @param q       search string (optional, blank = no filter)
+    * @param archief {@code true} to include archived instruments (default {@code false})
+    * @param max     maximum rows (optional; {@code -1} = all)
+    * @return {@code 200} with the list of matching rows
+    */
+   @GetMapping
+   public List<InstrumentSearchRow> search(
+         @RequestParam(required = false) String q,
+         @RequestParam(required = false, defaultValue = "false") boolean archief,
+         @RequestParam(required = false) Integer max)
+   {
+      LOG.debug("GET /api/instrument q={} archief={} max={}", q, archief, max);
+      return service.search(q, archief, max);
    }
 
 

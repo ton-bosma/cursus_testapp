@@ -1,13 +1,21 @@
 package nl.uampyyg.viool.instrument;
 
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import nl.uampyyg.viool.instrument.dto.InstrumentRow;
+import nl.uampyyg.viool.instrument.dto.InstrumentSearchRow;
 import nl.uampyyg.viool.jooq.tables.records.InstrumentRecord;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
+import static nl.uampyyg.viool.jooq.Tables.INSTR_TYPE;
 import static nl.uampyyg.viool.jooq.Tables.INSTRUMENT;
 
 
@@ -120,6 +128,113 @@ public class InstrumentRepository
 
 
    /**
+    * Multi-term search on instruments.
+    *
+    * <p>The query terms in {@code terms} are AND-ed: a row is included only
+    * when every term matches at least one of the following instrument-own
+    * fields (case-insensitive substring):
+    * <ul>
+    *   <li>INSTR_TYPE.OMSCHRIJVING (type description)</li>
+    *   <li>INSTRUMENT.MAAT</li>
+    *   <li>INSTRUMENT.HUURNR left-padded to 4 digits (e.g. {@code "0042"})</li>
+    *   <li>INSTRUMENT.AANSCHAFNR</li>
+    *   <li>INSTRUMENT.OMSCHRIJV_IN</li>
+    *   <li>INSTRUMENT.REPARATIES</li>
+    *   <li>INSTRUMENT.DATUM_IN formatted {@code dd-MM-yyyy}</li>
+    *   <li>INSTRUMENT.DATUM_UIT formatted {@code dd-MM-yyyy}</li>
+    * </ul>
+    *
+    * <p><b>Address-search deviation</b>: FO §4.1 also lists inkoop/verkoop
+    * address fields as searchable. The ADRES domain is out of v1 scope; those
+    * fields are not searched here. See {@link InstrumentSearchRow} for details.
+    *
+    * <p>All search terms use jOOQ {@code likeIgnoreCase} / {@code DSL.lower}
+    * with bound parameters — no string concatenation into SQL (ADR-003).
+    *
+    * @param terms    search terms (already split by the caller); empty → no
+    *                 term condition (all rows match)
+    * @param archief  when {@code false} only non-archived rows ({@code datum_uit IS NULL})
+    *                 are returned; when {@code true} archived rows are included too
+    * @param max      maximum number of rows to return; {@code -1} or {@code null}
+    *                 means unlimited
+    * @return the matching rows ordered by aanschafnr
+    */
+   public List<InstrumentSearchRow> search(List<String> terms, boolean archief, Integer max)
+   {
+      // Date formatter for the formatted-date search fields
+      DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+      // Archive filter: default = active only (datum_uit IS NULL)
+      Condition baseCondition = archief
+            ? DSL.trueCondition()
+            : INSTRUMENT.DATUM_UIT.isNull();
+
+      // AND over terms: each term must match at least one of the searchable fields
+      for (String term : terms)
+      {
+         String pattern = "%" + term.toLowerCase() + "%";
+
+         // huurnr padded to 4 digits: lpad(cast(huurnr as varchar), 4, '0')
+         Field<String> huurnrPadded = DSL.field(
+               "lpad(cast({0} as varchar), 4, '0')",
+               String.class,
+               INSTRUMENT.HUURNR);
+
+         // datum_in formatted dd-MM-yyyy
+         Field<String> datumInFormatted = DSL.field(
+               "to_char({0}, 'DD-MM-YYYY')",
+               String.class,
+               INSTRUMENT.DATUM_IN);
+
+         // datum_uit formatted dd-MM-yyyy
+         Field<String> datumUitFormatted = DSL.field(
+               "to_char({0}, 'DD-MM-YYYY')",
+               String.class,
+               INSTRUMENT.DATUM_UIT);
+
+         Condition termCondition = DSL.or(
+               DSL.lower(INSTR_TYPE.OMSCHRIJVING).like(DSL.val(pattern)),
+               DSL.lower(INSTRUMENT.MAAT).like(DSL.val(pattern)),
+               DSL.lower(huurnrPadded).like(DSL.val(pattern)),
+               DSL.lower(INSTRUMENT.AANSCHAFNR).like(DSL.val(pattern)),
+               DSL.lower(INSTRUMENT.OMSCHRIJV_IN).like(DSL.val(pattern)),
+               DSL.lower(INSTRUMENT.REPARATIES).like(DSL.val(pattern)),
+               datumInFormatted.like(DSL.val(pattern)),
+               datumUitFormatted.like(DSL.val(pattern))
+         );
+
+         baseCondition = baseCondition.and(termCondition);
+      }
+
+      var query = dsl
+            .select(
+                  INSTRUMENT.ID_INSTRUMENT,
+                  INSTRUMENT.HUURNR,
+                  INSTRUMENT.AANSCHAFNR,
+                  INSTR_TYPE.OMSCHRIJVING,
+                  INSTRUMENT.MAAT,
+                  INSTRUMENT.DATUM_IN,
+                  INSTRUMENT.DATUM_UIT)
+            .from(INSTRUMENT)
+            .leftJoin(INSTR_TYPE)
+            .on(INSTR_TYPE.ID_INSTR_TYPE.eq(INSTRUMENT.ID_INSTR_TYPE))
+            .where(baseCondition)
+            .orderBy(INSTRUMENT.AANSCHAFNR.asc());
+
+      List<InstrumentSearchRow> result = new ArrayList<>();
+      if (max != null && max > 0)
+      {
+         result = query.limit(max).fetch(InstrumentRepository::toSearchRow);
+      }
+      else
+      {
+         result = query.fetch(InstrumentRepository::toSearchRow);
+      }
+      return result;
+   }
+
+
+   /**
     * Copies every mutable (non-identity) column from the DTO onto a fresh
     * record. Used for inserts; the identity {@code ID_INSTRUMENT} is left to
     * the database.
@@ -147,6 +262,29 @@ public class InstrumentRepository
       record.setIdInstrType(row.getIdInstrType());
       record.setFoto(row.getFoto());
       record.setDatumTaxatie(row.getDatumTaxatie());
+   }
+
+
+   /**
+    * Maps a jOOQ record from the search query onto an {@link InstrumentSearchRow}.
+    * {@code inkoopAdres} and {@code verkoopAdres} are set to {@code ""} because
+    * the ADRES domain is not yet implemented in v1.
+    */
+   private static InstrumentSearchRow toSearchRow(org.jooq.Record record)
+   {
+      InstrumentSearchRow row = new InstrumentSearchRow();
+      row.setId(record.get(INSTRUMENT.ID_INSTRUMENT));
+      row.setHuurnr(record.get(INSTRUMENT.HUURNR));
+      row.setAanschafnr(record.get(INSTRUMENT.AANSCHAFNR));
+      String omschrijving = record.get(INSTR_TYPE.OMSCHRIJVING);
+      row.setType(omschrijving != null ? omschrijving : "");
+      row.setMaat(record.get(INSTRUMENT.MAAT));
+      // ADRES domain not yet implemented in v1; address fields always empty
+      row.setInkoopAdres("");
+      row.setVerkoopAdres("");
+      row.setAanschafdatum(record.get(INSTRUMENT.DATUM_IN));
+      row.setVerkoopdatum(record.get(INSTRUMENT.DATUM_UIT));
+      return row;
    }
 
 

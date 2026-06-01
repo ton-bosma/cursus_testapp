@@ -1,8 +1,12 @@
 package nl.uampyyg.viool.instrument;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import nl.uampyyg.viool.instrument.dto.InstrumentRow;
+import nl.uampyyg.viool.instrument.dto.InstrumentSearchRow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +33,33 @@ public class InstrumentService
    public InstrumentService(InstrumentRepository repository)
    {
       this.repository = repository;
+   }
+
+
+   /**
+    * Multi-term search on instruments.
+    *
+    * <p>The query string {@code q} is split on whitespace; each non-blank token
+    * becomes a separate search term that must match (AND) at least one of the
+    * searchable instrument fields (see {@link InstrumentRepository#search}).
+    *
+    * @param q       the raw search string (may be {@code null} or blank)
+    * @param archief when {@code true} archived instruments (datum_uit set) are
+    *                included; when {@code false} only active instruments are returned
+    * @param max     maximum rows: 10/20/50/100 or {@code -1}/{@code null} for all
+    * @return the matching search rows
+    */
+   @Transactional(readOnly = true)
+   public List<InstrumentSearchRow> search(String q, boolean archief, Integer max)
+   {
+      List<String> terms = (q == null || q.isBlank())
+            ? List.of()
+            : Arrays.stream(q.trim().split("\\s+"))
+                  .filter(t -> !t.isBlank())
+                  .collect(Collectors.toList());
+
+      LOG.debug("search: terms={} archief={} max={}", terms, archief, max);
+      return repository.search(terms, archief, max);
    }
 
 
