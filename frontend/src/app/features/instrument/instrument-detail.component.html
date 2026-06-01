@@ -1,0 +1,165 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<form class="detail" [formGroup]="form" (ngSubmit)="save()">
+  <mat-accordion multi>
+    <!-- Panel: In -->
+    <mat-expansion-panel expanded>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ labels.panelIn }}</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="fields">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.datumIn }}</mat-label>
+          <input matInput type="date" formControlName="datumIn" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.inkoopbron }}</mat-label>
+          <mat-select formControlName="idInkoopbron">
+            @for (bron of bronnen(); track bron.id) {
+              <mat-option [value]="bron.id">{{ bron.omschrijving }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.aanschafnr }}</mat-label>
+          <input matInput formControlName="aanschafnr" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.huurnr }}</mat-label>
+          <input matInput type="number" formControlName="huurnr" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.inkoopFactuur }}</mat-label>
+          <input matInput formControlName="inkoopFactuur" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.inkoopInstr }}</mat-label>
+          <input matInput type="text" inputmode="decimal" appCurrency formControlName="inkoopInstr" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.inkoopAcc }}</mat-label>
+          <input matInput type="text" inputmode="decimal" appCurrency formControlName="inkoopAcc" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.idAdresIn }}</mat-label>
+          <input matInput type="number" formControlName="idAdresIn" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.idAdresTaxateur }}</mat-label>
+          <input matInput type="number" formControlName="idAdresTaxateur" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.datumTaxatie }}</mat-label>
+          <input matInput type="date" formControlName="datumTaxatie" />
+        </mat-form-field>
+      </div>
+
+      <div class="panel-actions">
+        <button type="button" mat-stroked-button (click)="generateAanschafnr()">
+          {{ labels.btnGenereerAanschafnr }}
+        </button>
+        <button type="button" mat-stroked-button (click)="generateHuurnr()">
+          {{ labels.btnGenereerHuurnr }}
+        </button>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- Panel: Uit -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ labels.panelUit }}</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="fields">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.datumUit }}</mat-label>
+          <input matInput type="date" formControlName="datumUit" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.verkoopInstr }}</mat-label>
+          <input matInput type="text" inputmode="decimal" appCurrency formControlName="verkoopInstr" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.idAdresUit }}</mat-label>
+          <input matInput type="number" formControlName="idAdresUit" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.verkoopBtw }}</mat-label>
+          <input matInput type="text" inputmode="decimal" appCurrency formControlName="verkoopBtw" />
+        </mat-form-field>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- Panel: Instrument -->
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ labels.panelInstrument }}</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="fields">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.type }}</mat-label>
+          <mat-select formControlName="idInstrType">
+            @for (type of types(); track type.id) {
+              <mat-option [value]="type.id">{{ type.omschrijving }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.maat }}</mat-label>
+          <input matInput formControlName="maat" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ labels.velden.anno }}</mat-label>
+          <input matInput type="number" formControlName="anno" />
+        </mat-form-field>
+
+        <mat-checkbox formControlName="antique">{{ labels.velden.antique }}</mat-checkbox>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ labels.velden.omschrijving }}</mat-label>
+          <textarea matInput rows="3" formControlName="omschrijvIn"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ labels.velden.reparaties }}</mat-label>
+          <textarea matInput rows="2" formControlName="reparaties"></textarea>
+        </mat-form-field>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <div class="form-actions">
+    <button type="submit" mat-raised-button color="primary" [disabled]="saving()">
+      {{ labels.btnOpslaan }}
+    </button>
+    @if (nested) {
+      <button
+        type="button"
+        mat-stroked-button
+        color="warn"
+        [disabled]="currentId() === undefined"
+        (click)="delete()"
+      >
+        {{ labels.btnVerwijderen }}
+      </button>
+    }
+  </div>
+</form>

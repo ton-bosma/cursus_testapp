@@ -14,6 +14,20 @@ export const appRoutes: Routes = [
       ),
   },
   {
+    path: 'instrumenten/nieuw',
+    loadComponent: () =>
+      import('./features/instrument/instrument-detail.component').then(
+        (m) => m.InstrumentDetailComponent,
+      ),
+  },
+  {
+    path: 'instrumenten/:id',
+    loadComponent: () =>
+      import('./features/instrument/instrument-detail.component').then(
+        (m) => m.InstrumentDetailComponent,
+      ),
+  },
+  {
     path: 'types',
     loadComponent: () =>
       import('./features/instrumenttype/instrumenttype-list.component').then(

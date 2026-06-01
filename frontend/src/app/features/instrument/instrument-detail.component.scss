@@ -1,0 +1,29 @@
+.detail {
+  display: block;
+  max-width: 900px;
+  padding: 1rem;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.5rem 1rem;
+  align-items: center;
+  padding-top: 0.5rem;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
