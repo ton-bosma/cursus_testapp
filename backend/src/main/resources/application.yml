@@ -5,6 +5,19 @@ spring:
   application:
     name: viool
 
+  datasource:
+    url: jdbc:postgresql://localhost:5432/viool
+    username: viool
+    password: viool
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jooq:
+    sql-dialect: POSTGRES
+
 management:
   endpoints:
     web:
