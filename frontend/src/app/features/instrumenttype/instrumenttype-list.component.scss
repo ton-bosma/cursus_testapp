@@ -1,25 +1,49 @@
-.page-container {
-  padding: 24px;
-  max-width: 800px;
+// ── Host ────────────────────────────────────────────────────────
+:host {
+  display: block;
+  background: var(--paper);
+  color: var(--ink);
 }
 
+// ── Page wrapper ────────────────────────────────────────────────
+.types-page {
+  display: block;
+  max-width: 860px;
+}
+
+// ── Inline edit table ───────────────────────────────────────────
 .inline-table {
   width: 100%;
-  margin-bottom: 16px;
-
-  .cell-field {
-    width: 100%;
-    margin: 4px 0;
-  }
+  margin-bottom: 20px;
 }
 
-.deleted-row {
-  opacity: 0.4;
+// Forfait column: right-align the numeric cell content
+.cell--num {
+  text-align: right;
+}
+
+.cell-field {
+  width: 100%;
+  margin: 4px 0;
+}
+
+// Make the forfait input column narrower and numerals monospaced
+.cell-field--num {
+  max-width: 160px;
+}
+
+// ── Deleted-row styling ─────────────────────────────────────────
+// Rows marked for deletion are shown struck through in ink-soft.
+.row--deleted {
+  opacity: 0.45;
+  color: var(--ink-soft);
   text-decoration: line-through;
 }
 
+// ── Toolbar ─────────────────────────────────────────────────────
 .toolbar {
   display: flex;
   gap: 12px;
   align-items: center;
+  margin-top: 4px;
 }
