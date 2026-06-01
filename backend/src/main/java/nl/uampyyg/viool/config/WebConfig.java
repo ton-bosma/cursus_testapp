@@ -1,5 +1,8 @@
 package nl.uampyyg.viool.config;
 
+import java.time.Clock;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -17,5 +20,17 @@ public class WebConfig implements WebMvcConfigurer
          .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
          .allowedHeaders("*")
          .allowCredentials(true);
+   }
+
+
+   /**
+    * System clock bean, injectable as {@link Clock} for deterministic unit testing.
+    *
+    * @return a {@link Clock#systemDefaultZone()} instance
+    */
+   @Bean
+   public Clock clock()
+   {
+      return Clock.systemDefaultZone();
    }
 }

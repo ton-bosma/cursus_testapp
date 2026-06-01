@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 /**
- * REST endpoints for instrument search and CRUD.
+ * REST endpoints for instrument search, CRUD and number generation.
  *
  * <ul>
  *   <li>{@code GET /api/instrument} — multi-term search with archive filter
@@ -29,6 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
  *       returning the persisted row.</li>
  *   <li>{@code DELETE /api/instrument/{id}} — delete, 204 on success
  *       (404 if absent).</li>
+ *   <li>{@code PUT /api/instrument/aanschafnummer} — generate and return an
+ *       instrument with {@code aanschafnr} set (400 if datumIn/inkoopbron missing).</li>
+ *   <li>{@code PUT /api/instrument/huurnummer} — generate and return an
+ *       instrument with {@code huurnr} set.</li>
  * </ul>
  */
 @RestController
@@ -113,5 +117,38 @@ public class InstrumentController
    {
       service.delete(id);
       return ResponseEntity.noContent().build();
+   }
+
+
+   /**
+    * Generates an aanschafnummer for the given instrument and returns the row with
+    * the {@code aanschafnr} field set.
+    *
+    * <p>Requires {@code datumIn} and {@code idInkoopbron} to be present on the body;
+    * returns {@code 400 Bad Request} otherwise (ADR-006: no silent failure).
+    *
+    * @param row the instrument row (must have datumIn and idInkoopbron)
+    * @return {@code 200} with the row with {@code aanschafnr} set
+    */
+   @PutMapping("/aanschafnummer")
+   public InstrumentRow generateAanschafnummer(@RequestBody InstrumentRow row)
+   {
+      LOG.debug("PUT /api/instrument/aanschafnummer id={}", row.getId());
+      return service.generateAanschafnr(row);
+   }
+
+
+   /**
+    * Generates a huurnummer for the given instrument and returns the row with the
+    * {@code huurnr} field set.
+    *
+    * @param row the instrument row
+    * @return {@code 200} with the row with {@code huurnr} set
+    */
+   @PutMapping("/huurnummer")
+   public InstrumentRow generateHuurnummer(@RequestBody InstrumentRow row)
+   {
+      LOG.debug("PUT /api/instrument/huurnummer id={}", row.getId());
+      return service.generateHuurnr(row);
    }
 }

@@ -1,5 +1,8 @@
 package nl.uampyyg.viool.instrument;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -7,11 +10,15 @@ import java.util.stream.Collectors;
 
 import nl.uampyyg.viool.instrument.dto.InstrumentRow;
 import nl.uampyyg.viool.instrument.dto.InstrumentSearchRow;
+import nl.uampyyg.viool.inkoopbron.IInkoopbronRepository;
+import nl.uampyyg.viool.inkoopbron.dto.InkoopbronRow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 
 /**
@@ -27,12 +34,21 @@ public class InstrumentService
 {
    private static final Logger LOG = LoggerFactory.getLogger(InstrumentService.class);
 
-   private final InstrumentRepository repository;
+   private static final DateTimeFormatter YEAR_2D = DateTimeFormatter.ofPattern("yy");
+
+   private final InstrumentRepository  repository;
+   private final IInkoopbronRepository inkoopbronRepository;
+   private final Clock                 clock;
 
 
-   public InstrumentService(InstrumentRepository repository)
+   public InstrumentService(
+         InstrumentRepository repository,
+         IInkoopbronRepository inkoopbronRepository,
+         Clock clock)
    {
-      this.repository = repository;
+      this.repository           = repository;
+      this.inkoopbronRepository = inkoopbronRepository;
+      this.clock                = clock;
    }
 
 
@@ -125,5 +141,74 @@ public class InstrumentService
          throw new InstrumentNotFoundException(id);
       }
       LOG.debug("Deleted instrument with id {}", id);
+   }
+
+
+   /**
+    * Generates and sets the aanschafnummer on the given instrument row.
+    *
+    * <p>Format: {@code L.ddm.myy.NN} (FO §5.2). Requires {@code datumIn} and
+    * {@code idInkoopbron} to be present; throws HTTP 400 otherwise (ADR-006).
+    *
+    * @param row the instrument; must have {@code datumIn} and {@code idInkoopbron}
+    * @return a copy of the row with {@code aanschafnr} set to the generated value
+    * @throws ResponseStatusException (400) when {@code datumIn} or {@code idInkoopbron} is missing
+    */
+   @Transactional(readOnly = true)
+   public InstrumentRow generateAanschafnr(InstrumentRow row)
+   {
+      if (row.getDatumIn() == null)
+      {
+         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+               "datumIn is required to generate aanschafnr");
+      }
+      if (row.getIdInkoopbron() == null)
+      {
+         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+               "idInkoopbron is required to generate aanschafnr");
+      }
+
+      String omschrijving = inkoopbronRepository.findAll().stream()
+            .filter(b -> b.getId() != null && b.getId().equals(row.getIdInkoopbron()))
+            .map(InkoopbronRow::getOmschrijving)
+            .findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  "Inkoopbron not found: " + row.getIdInkoopbron()));
+
+      String prefix       = NummerGenerator.buildAanschafnrPrefix(omschrijving, row.getDatumIn());
+      long   excludeId    = row.getId() != null ? row.getId() : -1L;
+      int    existingCount = repository.countByAanschafnrPrefix(prefix, excludeId);
+      String aanschafnr   = NummerGenerator.buildAanschafnr(prefix, existingCount);
+
+      LOG.debug("Generated aanschafnr={} for instrument id={}", aanschafnr, row.getId());
+
+      row.setAanschafnr(aanschafnr);
+      return row;
+   }
+
+
+   /**
+    * Generates and sets the huurnummer on the given instrument row.
+    *
+    * <p>Format: {@code yy * 100 + volgnummer} (FO §5.1). The current date is
+    * obtained from the injected {@link Clock} so the calculation is testable.
+    *
+    * @param row the instrument
+    * @return a copy of the row with {@code huurnr} set to the generated value
+    */
+   @Transactional(readOnly = true)
+   public InstrumentRow generateHuurnr(InstrumentRow row)
+   {
+      LocalDate today      = LocalDate.now(clock);
+      String twoDigitYear  = today.format(YEAR_2D);           // e.g. "26"
+      int    yy            = Integer.parseInt(twoDigitYear);  // e.g. 26
+      long   excludeId     = row.getId() != null ? row.getId() : -1L;
+      int    maxVolgnummer  = repository.maxVolgnummerThisYear(twoDigitYear, excludeId);
+      int    huurnr        = NummerGenerator.buildHuurnr(yy, maxVolgnummer);
+
+      LOG.debug("Generated huurnr={} (year={}) for instrument id={}", huurnr, yy, row.getId());
+
+      row.setHuurnr(huurnr);
+      return row;
    }
 }

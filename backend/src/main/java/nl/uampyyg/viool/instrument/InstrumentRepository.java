@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import static nl.uampyyg.viool.jooq.Tables.INSTR_TYPE;
 import static nl.uampyyg.viool.jooq.Tables.INSTRUMENT;
+import static org.jooq.impl.DSL.val;
 
 
 /**
@@ -231,6 +232,74 @@ public class InstrumentRepository
          result = query.fetch(InstrumentRepository::toSearchRow);
       }
       return result;
+   }
+
+
+   /**
+    * Counts how many instruments (other than {@code excludeId}) have an
+    * {@code aanschafnr} whose first 10 characters equal {@code prefix}.
+    *
+    * <p>Used to compute the sequence number {@code NN} in the aanschafnummer
+    * format {@code L.ddm.myy.NN} (FO §5.2). The exclusion of the current
+    * instrument ensures re-generating a number for an existing instrument
+    * yields a stable sequence.
+    *
+    * @param prefix    the 10-character prefix to match (e.g. {@code "C.030.526."})
+    * @param excludeId the id of the instrument to exclude; pass {@code -1} for new instruments
+    * @return count of instruments sharing this prefix (excluding the given id)
+    */
+   public int countByAanschafnrPrefix(String prefix, long excludeId)
+   {
+      // SUBSTRING(aanschafnr, 1, 10) = first 10 chars (PostgreSQL 1-based)
+      Field<String> aanschafnrPrefix = DSL.field(
+            "substring({0}, 1, 10)",
+            String.class,
+            INSTRUMENT.AANSCHAFNR);
+
+      return dsl.select(DSL.count())
+            .from(INSTRUMENT)
+            .where(aanschafnrPrefix.eq(val(prefix)))
+            .and(INSTRUMENT.ID_INSTRUMENT.ne(excludeId))
+            .fetchOne(DSL.count());
+   }
+
+
+   /**
+    * Returns the highest volgnummer (positions 3-4 of the left-padded huurnr)
+    * among instruments of the given 2-digit year, excluding the instrument
+    * identified by {@code excludeId}.
+    *
+    * <p>Used to compute the next huurnummer (FO §5.1).
+    * The huurnr is left-padded to 4 digits before extracting positions:
+    * chars 1-2 = year, chars 3-4 = volgnummer.
+    *
+    * @param twoDigitYear the current year as a zero-padded 2-character string (e.g. {@code "26"})
+    * @param excludeId    the id of the instrument to exclude; pass {@code -1} for new instruments
+    * @return the maximum volgnummer this year, or {@code 0} when no instruments exist this year
+    */
+   public int maxVolgnummerThisYear(String twoDigitYear, long excludeId)
+   {
+      // lpad(cast(huurnr as varchar), 4, '0')
+      Field<String> padded = DSL.field(
+            "lpad(cast({0} as varchar), 4, '0')",
+            String.class,
+            INSTRUMENT.HUURNR);
+
+      // year part = first 2 chars, volgnummer part = chars 3-4
+      Field<String> yearPart      = DSL.field("substring({0}, 1, 2)", String.class, padded);
+      Field<Integer> volgnrPart   = DSL.field(
+            "cast(substring({0}, 3, 2) as integer)",
+            Integer.class,
+            padded);
+
+      Integer max = dsl.select(DSL.max(volgnrPart))
+            .from(INSTRUMENT)
+            .where(INSTRUMENT.HUURNR.isNotNull())
+            .and(yearPart.eq(val(twoDigitYear)))
+            .and(INSTRUMENT.ID_INSTRUMENT.ne(excludeId))
+            .fetchOne(DSL.max(volgnrPart));
+
+      return max != null ? max : 0;
    }
 
 
