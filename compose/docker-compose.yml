@@ -1,0 +1,56 @@
+services:
+
+  # ── PostgreSQL 16 ─────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-viool}
+      POSTGRES_USER: ${POSTGRES_USER:-viool}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-viool} -d ${POSTGRES_DB:-viool}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── Spring Boot backend ───────────────────────────────────────────────────
+  backend:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    environment:
+      # Datasource — aligns with ticket #6 (jOOQ/Flyway) and standard Spring config
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-viool}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-viool}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      # File-storage seam (ADR-007 — no upload feature yet, just the mount)
+      VIOOL_STORAGE_DIR: /app/storage
+    volumes:
+      - file-storage:/app/storage
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Angular frontend (nginx) ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  # Persistent storage for PostgreSQL data
+  db-data:
+  # File-storage seam for backend (ADR-007)
+  file-storage:
