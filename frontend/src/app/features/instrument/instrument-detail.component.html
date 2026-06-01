@@ -23,59 +23,72 @@
       </mat-expansion-panel-header>
 
       <div class="fields">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.datumIn }}</mat-label>
-          <input matInput class="num" type="date" formControlName="datumIn" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.datumIn }}</span>
+          <input class="ledger-input" type="date" formControlName="datumIn" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.inkoopbron }}</mat-label>
-          <mat-select formControlName="idInkoopbron">
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.inkoopbron }}</span>
+          <select class="ledger-input" formControlName="idInkoopbron">
+            <option [ngValue]="null">—</option>
             @for (bron of bronnen(); track bron.id) {
-              <mat-option [value]="bron.id">{{ bron.omschrijving }}</mat-option>
+              <option [ngValue]="bron.id">{{ bron.omschrijving }}</option>
             }
-          </mat-select>
-        </mat-form-field>
+          </select>
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.aanschafnr }}</mat-label>
-          <input matInput formControlName="aanschafnr" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.aanschafnr }}</span>
+          <input class="ledger-input" type="text" formControlName="aanschafnr" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.huurnr }}</mat-label>
-          <input matInput class="num" type="number" formControlName="huurnr" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.huurnr }}</span>
+          <input class="ledger-input ledger-input--num" type="number" formControlName="huurnr" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.inkoopFactuur }}</mat-label>
-          <input matInput formControlName="inkoopFactuur" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.inkoopFactuur }}</span>
+          <input class="ledger-input" type="text" formControlName="inkoopFactuur" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.inkoopInstr }}</mat-label>
-          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="inkoopInstr" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.inkoopInstr }}</span>
+          <input
+            class="ledger-input ledger-input--num"
+            type="text"
+            inputmode="decimal"
+            appCurrency
+            formControlName="inkoopInstr"
+          />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.inkoopAcc }}</mat-label>
-          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="inkoopAcc" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.inkoopAcc }}</span>
+          <input
+            class="ledger-input ledger-input--num"
+            type="text"
+            inputmode="decimal"
+            appCurrency
+            formControlName="inkoopAcc"
+          />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.idAdresIn }}</mat-label>
-          <input matInput class="num" type="number" formControlName="idAdresIn" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.idAdresIn }}</span>
+          <input class="ledger-input ledger-input--num" type="number" formControlName="idAdresIn" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.idAdresTaxateur }}</mat-label>
-          <input matInput class="num" type="number" formControlName="idAdresTaxateur" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.idAdresTaxateur }}</span>
+          <input class="ledger-input ledger-input--num" type="number" formControlName="idAdresTaxateur" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.datumTaxatie }}</mat-label>
-          <input matInput class="num" type="date" formControlName="datumTaxatie" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.datumTaxatie }}</span>
+          <input class="ledger-input" type="date" formControlName="datumTaxatie" />
+        </label>
       </div>
 
       <div class="panel-actions">
@@ -97,25 +110,37 @@
       </mat-expansion-panel-header>
 
       <div class="fields">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.datumUit }}</mat-label>
-          <input matInput class="num" type="date" formControlName="datumUit" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.datumUit }}</span>
+          <input class="ledger-input" type="date" formControlName="datumUit" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.verkoopInstr }}</mat-label>
-          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="verkoopInstr" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.verkoopInstr }}</span>
+          <input
+            class="ledger-input ledger-input--num"
+            type="text"
+            inputmode="decimal"
+            appCurrency
+            formControlName="verkoopInstr"
+          />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.idAdresUit }}</mat-label>
-          <input matInput class="num" type="number" formControlName="idAdresUit" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.idAdresUit }}</span>
+          <input class="ledger-input ledger-input--num" type="number" formControlName="idAdresUit" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.verkoopBtw }}</mat-label>
-          <input matInput class="num" type="text" inputmode="decimal" appCurrency formControlName="verkoopBtw" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.verkoopBtw }}</span>
+          <input
+            class="ledger-input ledger-input--num"
+            type="text"
+            inputmode="decimal"
+            appCurrency
+            formControlName="verkoopBtw"
+          />
+        </label>
       </div>
     </mat-expansion-panel>
 
@@ -128,36 +153,40 @@
       </mat-expansion-panel-header>
 
       <div class="fields">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.type }}</mat-label>
-          <mat-select formControlName="idInstrType">
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.type }}</span>
+          <select class="ledger-input" formControlName="idInstrType">
+            <option [ngValue]="null">—</option>
             @for (type of types(); track type.id) {
-              <mat-option [value]="type.id">{{ type.omschrijving }}</mat-option>
+              <option [ngValue]="type.id">{{ type.omschrijving }}</option>
             }
-          </mat-select>
-        </mat-form-field>
+          </select>
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.maat }}</mat-label>
-          <input matInput formControlName="maat" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.maat }}</span>
+          <input class="ledger-input" type="text" formControlName="maat" />
+        </label>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ labels.velden.anno }}</mat-label>
-          <input matInput class="num" type="number" formControlName="anno" />
-        </mat-form-field>
+        <label class="ledger-field">
+          <span class="ledger-field__label">{{ labels.velden.anno }}</span>
+          <input class="ledger-input ledger-input--num" type="number" formControlName="anno" />
+        </label>
 
-        <mat-checkbox formControlName="antique">{{ labels.velden.antique }}</mat-checkbox>
+        <label class="ledger-field ledger-field--inline">
+          <input type="checkbox" formControlName="antique" />
+          <span class="ledger-field__label">{{ labels.velden.antique }}</span>
+        </label>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ labels.velden.omschrijving }}</mat-label>
-          <textarea matInput rows="3" formControlName="omschrijvIn"></textarea>
-        </mat-form-field>
+        <label class="ledger-field full-width">
+          <span class="ledger-field__label">{{ labels.velden.omschrijving }}</span>
+          <textarea class="ledger-input" rows="3" formControlName="omschrijvIn"></textarea>
+        </label>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ labels.velden.reparaties }}</mat-label>
-          <textarea matInput rows="2" formControlName="reparaties"></textarea>
-        </mat-form-field>
+        <label class="ledger-field full-width">
+          <span class="ledger-field__label">{{ labels.velden.reparaties }}</span>
+          <textarea class="ledger-input" rows="2" formControlName="reparaties"></textarea>
+        </label>
       </div>
     </mat-expansion-panel>
   </mat-accordion>
