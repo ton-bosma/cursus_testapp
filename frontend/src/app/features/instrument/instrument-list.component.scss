@@ -1,56 +1,67 @@
 .instrument-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
+  gap: 1.25rem;
+  padding: clamp(16px, 3vw, 36px);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: calc(100vh - 96px);
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  &__title {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 500;
-  }
-
-  &__filters {
+  // ── Toolbar (filters row) ──────────────────────────────────
+  &__toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 1rem;
+    gap: 12px;
+    padding: 14px 0 10px;
+    border-bottom: 1px solid var(--hairline);
   }
 
   &__search {
-    flex: 1 1 320px;
-    min-width: 240px;
+    flex: 1 1 280px;
+    min-width: 200px;
+  }
+
+  &__archief {
+    font-family: var(--font-body);
+    color: var(--ink);
+    white-space: nowrap;
   }
 
   &__max {
-    flex: 0 0 160px;
+    flex: 0 0 148px;
   }
 
+  // ── "Nieuw" action button ──────────────────────────────────
+  // Global styles handle shape + font; just pin the size here.
+  &__new-btn {
+    white-space: nowrap;
+    align-self: flex-end;
+    margin-bottom: 2px;
+  }
+
+  // ── Table ─────────────────────────────────────────────────
   &__table-wrapper {
     overflow-x: auto;
   }
 
   &__table {
     width: 100%;
+    // Global .mat-mdc-table rules cover border, header and cell chrome.
   }
 
   &__row {
     cursor: pointer;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
+    // Hover is handled by global .mat-mdc-row:hover rule in styles.scss.
   }
 
+  // ── Empty state ────────────────────────────────────────────
   &__empty {
-    padding: 1rem 0;
-    color: rgba(0, 0, 0, 0.6);
+    margin: 24px 0 8px;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
   }
 }

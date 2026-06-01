@@ -20,6 +20,9 @@ import { InstrumentService } from './instrument.service';
 /** Debounce interval (ms) for the live search input. */
 const SEARCH_DEBOUNCE_MS = 300;
 
+/** Masthead meta line shown above the title (uppercase, monospaced). */
+const META_LINE = 'REGISTER · INSTRUMENTEN';
+
 @Component({
   selector: 'app-instrument-list',
   standalone: true,
@@ -42,6 +45,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 export class InstrumentListComponent {
   protected readonly labels = NL.instrument;
   protected readonly maxOptions = MAX_RESULTS_OPTIONS;
+  protected readonly metaLine = META_LINE;
 
   protected readonly displayedColumns: readonly string[] = [
     'huurnr',
