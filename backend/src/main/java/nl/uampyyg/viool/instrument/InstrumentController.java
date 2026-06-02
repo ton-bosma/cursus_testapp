@@ -7,8 +7,11 @@ import nl.uampyyg.viool.instrument.dto.InstrumentSearchRow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -150,5 +153,41 @@ public class InstrumentController
    {
       LOG.debug("PUT /api/instrument/huurnummer id={}", row.getId());
       return service.generateHuurnr(row);
+   }
+
+
+   /**
+    * Handles concurrent duplicate saves caught by the UNIQUE constraints on
+    * {@code aanschafnr} and {@code huurnr} (V2 migration). Returns {@code 409
+    * Conflict} so the client can prompt the user to regenerate the number.
+    *
+    * @param ex the integrity-violation thrown by the persistence layer
+    * @return {@code 409} with a human-readable message
+    */
+   @ExceptionHandler(DataIntegrityViolationException.class)
+   public ResponseEntity<String> handleDuplicateNumber(DataIntegrityViolationException ex)
+   {
+      LOG.warn("Duplicate instrument number rejected: {}", ex.getMessage());
+      return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body("Instrumentnummer bestaat al — genereer opnieuw.");
+   }
+
+
+   /**
+    * Handles sequence-exhaustion guards thrown by {@link NummerGenerator} when
+    * a prefix already has 99 instruments (ADR-006). Returns {@code 409 Conflict}
+    * so the client surfaces the error clearly.
+    *
+    * @param ex the state-exception thrown by the number generator
+    * @return {@code 409} with the exception message
+    */
+   @ExceptionHandler(IllegalStateException.class)
+   public ResponseEntity<String> handleSequenceExhausted(IllegalStateException ex)
+   {
+      LOG.warn("Number sequence exhausted: {}", ex.getMessage());
+      return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(ex.getMessage());
    }
 }

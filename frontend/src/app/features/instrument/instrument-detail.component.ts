@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  EventEmitter,
   Input,
   OnInit,
+  Output,
   computed,
   inject,
   signal,
@@ -83,6 +85,9 @@ export class InstrumentDetailComponent implements OnInit {
    * delete button is only shown in this mode (per spec).
    */
   @Input() public nested = false;
+
+  /** Emitted after a successful delete so the host can close the nested view. */
+  @Output() public readonly deleted = new EventEmitter<void>();
 
   protected readonly labels = NL.instrumentDetail;
 
@@ -165,6 +170,12 @@ export class InstrumentDetailComponent implements OnInit {
     this._service.delete$(id).subscribe({
       next: () => {
         this._snackBar.open(this.labels.verwijderd, 'OK', { duration: 3000 });
+        this.currentId.set(undefined);
+        this.form.reset();
+        this.deleted.emit();
+      },
+      error: () => {
+        this._snackBar.open(this.labels.verwijderenMislukt, 'Sluiten', { duration: 5000 });
       },
     });
   }

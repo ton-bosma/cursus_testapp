@@ -175,10 +175,10 @@ public class InstrumentService
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                   "Inkoopbron not found: " + row.getIdInkoopbron()));
 
-      String prefix       = NummerGenerator.buildAanschafnrPrefix(omschrijving, row.getDatumIn());
-      long   excludeId    = row.getId() != null ? row.getId() : -1L;
-      int    existingCount = repository.countByAanschafnrPrefix(prefix, excludeId);
-      String aanschafnr   = NummerGenerator.buildAanschafnr(prefix, existingCount);
+      String prefix    = NummerGenerator.buildAanschafnrPrefix(omschrijving, row.getDatumIn());
+      long   excludeId = row.getId() != null ? row.getId() : -1L;
+      int    maxSeq    = repository.maxAanschafnrSeqByPrefix(prefix, excludeId);
+      String aanschafnr = NummerGenerator.buildAanschafnr(prefix, maxSeq);
 
       LOG.debug("Generated aanschafnr={} for instrument id={}", aanschafnr, row.getId());
 

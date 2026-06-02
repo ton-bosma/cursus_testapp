@@ -117,7 +117,11 @@
     </table>
 
     @if (!loading() && rows().length === 0) {
-      <p class="instrument-list__empty">{{ labels.geenResultaten }}</p>
+      @if (searchFailed()) {
+        <p class="instrument-list__empty">{{ labels.zoekenMislukt }}</p>
+      } @else {
+        <p class="instrument-list__empty">{{ labels.geenResultaten }}</p>
+      }
     }
   </div>
 </section>

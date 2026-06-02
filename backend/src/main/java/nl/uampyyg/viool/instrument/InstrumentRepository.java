@@ -236,19 +236,22 @@ public class InstrumentRepository
 
 
    /**
-    * Counts how many instruments (other than {@code excludeId}) have an
-    * {@code aanschafnr} whose first 10 characters equal {@code prefix}.
+    * Returns the highest 2-digit sequence number (positions 11-12 of the
+    * {@code aanschafnr}) among instruments whose first 10 characters equal
+    * {@code prefix}, excluding the instrument identified by {@code excludeId}.
     *
-    * <p>Used to compute the sequence number {@code NN} in the aanschafnummer
-    * format {@code L.ddm.myy.NN} (FO §5.2). The exclusion of the current
-    * instrument ensures re-generating a number for an existing instrument
-    * yields a stable sequence.
+    * <p>Used to compute the next sequence number {@code NN} in the
+    * aanschafnummer format {@code L.ddm.myy.NN} (FO §5.2). Using MAX instead
+    * of COUNT avoids re-collision after a delete (gaps in the sequence no
+    * longer cause duplicate numbers). The exclusion of the current instrument
+    * ensures re-generating a number for an existing instrument yields a stable
+    * result.
     *
     * @param prefix    the 10-character prefix to match (e.g. {@code "C.030.526."})
     * @param excludeId the id of the instrument to exclude; pass {@code -1} for new instruments
-    * @return count of instruments sharing this prefix (excluding the given id)
+    * @return the maximum sequence number found (0 when no instruments share this prefix)
     */
-   public int countByAanschafnrPrefix(String prefix, long excludeId)
+   public int maxAanschafnrSeqByPrefix(String prefix, long excludeId)
    {
       // SUBSTRING(aanschafnr, 1, 10) = first 10 chars (PostgreSQL 1-based)
       Field<String> aanschafnrPrefix = DSL.field(
@@ -256,11 +259,20 @@ public class InstrumentRepository
             String.class,
             INSTRUMENT.AANSCHAFNR);
 
-      return dsl.select(DSL.count())
+      // positions 11-12 of aanschafnr = the 2-digit NN sequence
+      Field<Integer> seqPart = DSL.field(
+            "cast(substring({0}, 11, 2) as integer)",
+            Integer.class,
+            INSTRUMENT.AANSCHAFNR);
+
+      Integer max = dsl.select(DSL.max(seqPart))
             .from(INSTRUMENT)
-            .where(aanschafnrPrefix.eq(val(prefix)))
+            .where(INSTRUMENT.AANSCHAFNR.isNotNull())
+            .and(aanschafnrPrefix.eq(val(prefix)))
             .and(INSTRUMENT.ID_INSTRUMENT.ne(excludeId))
-            .fetchOne(DSL.count());
+            .fetchOne(DSL.max(seqPart));
+
+      return max != null ? max : 0;
    }
 
 

@@ -29,7 +29,7 @@ class InstrumentServiceIT extends AbstractIntegrationTest
    @Test
    void insertWithoutIdGeneratesIdAndReturnsRow()
    {
-      InstrumentRow row = sampleRow();
+      InstrumentRow row = sampleRow("A-001", 42);
 
       InstrumentRow saved = service.save(row);
 
@@ -49,13 +49,13 @@ class InstrumentServiceIT extends AbstractIntegrationTest
    @Test
    void findByIdReturnsPersistedRow()
    {
-      InstrumentRow saved = service.save(sampleRow());
+      InstrumentRow saved = service.save(sampleRow("A-002", 43));
 
       Optional<InstrumentRow> found = service.findById(saved.getId());
 
       assertThat(found).isPresent();
       assertThat(found.get().getId()).isEqualTo(saved.getId());
-      assertThat(found.get().getAanschafnr()).isEqualTo("A-001");
+      assertThat(found.get().getAanschafnr()).isEqualTo("A-002");
    }
 
 
@@ -69,13 +69,13 @@ class InstrumentServiceIT extends AbstractIntegrationTest
    @Test
    void updateRewritesAllFields()
    {
-      InstrumentRow saved = service.save(sampleRow());
+      InstrumentRow saved = service.save(sampleRow("A-003", 44));
       Long id = saved.getId();
 
       InstrumentRow update = new InstrumentRow();
       update.setId(id);
-      update.setAanschafnr("A-002");
-      update.setHuurnr(7);
+      update.setAanschafnr("A-003-updated");
+      update.setHuurnr(47);
       update.setDatumIn(LocalDate.of(2025, 6, 1));
       update.setIdAdresIn(11L);
       update.setInkoopInstr(new BigDecimal("999.99"));
@@ -96,8 +96,8 @@ class InstrumentServiceIT extends AbstractIntegrationTest
       InstrumentRow result = service.save(update);
 
       assertThat(result.getId()).isEqualTo(id);
-      assertThat(result.getAanschafnr()).isEqualTo("A-002");
-      assertThat(result.getHuurnr()).isEqualTo(7);
+      assertThat(result.getAanschafnr()).isEqualTo("A-003-updated");
+      assertThat(result.getHuurnr()).isEqualTo(47);
       assertThat(result.getDatumIn()).isEqualTo(LocalDate.of(2025, 6, 1));
       assertThat(result.getIdAdresIn()).isEqualTo(11L);
       assertThat(result.getInkoopInstr()).isEqualByComparingTo("999.99");
@@ -114,7 +114,7 @@ class InstrumentServiceIT extends AbstractIntegrationTest
    @Test
    void updateUnknownIdThrows()
    {
-      InstrumentRow row = sampleRow();
+      InstrumentRow row = sampleRow("A-005", 46);
       row.setId(-12345L);
 
       assertThatThrownBy(() -> service.save(row))
@@ -125,7 +125,7 @@ class InstrumentServiceIT extends AbstractIntegrationTest
    @Test
    void deleteRemovesRow()
    {
-      InstrumentRow saved = service.save(sampleRow());
+      InstrumentRow saved = service.save(sampleRow("A-004", 45));
       Long id = saved.getId();
 
       service.delete(id);
@@ -144,12 +144,20 @@ class InstrumentServiceIT extends AbstractIntegrationTest
 
    /**
     * Builds a fully populated instrument (no id) for insertion.
+    *
+    * <p>Each test must pass distinct {@code aanschafnr} and {@code huurnr}
+    * values because the shared Testcontainers database is not rolled back
+    * between tests and the V2 migration enforces UNIQUE constraints on both
+    * columns.
+    *
+    * @param aanschafnr unique aanschafnr value for this test (e.g. {@code "A-001"})
+    * @param huurnr     unique huurnr value for this test (e.g. {@code 42})
     */
-   private static InstrumentRow sampleRow()
+   private static InstrumentRow sampleRow(String aanschafnr, int huurnr)
    {
       InstrumentRow row = new InstrumentRow();
-      row.setAanschafnr("A-001");
-      row.setHuurnr(42);
+      row.setAanschafnr(aanschafnr);
+      row.setHuurnr(huurnr);
       row.setDatumIn(LocalDate.of(2024, 1, 15));
       row.setIdAdresIn(1L);
       row.setInkoopInstr(new BigDecimal("1234.56"));

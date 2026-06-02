@@ -74,31 +74,50 @@ public final class NummerGenerator
 
 
    /**
-    * Builds the full aanschafnummer from the prefix and the count of existing instruments
-    * that already share that prefix (excluding the current instrument).
+    * Builds the full aanschafnummer from the prefix and the maximum existing
+    * sequence number that already shares that prefix (excluding the current
+    * instrument).
     *
-    * <p>The sequence number is {@code existingCount + 1}, zero-padded to 2 digits.
+    * <p>The next sequence number is {@code maxSeq + 1}, zero-padded to 2 digits.
+    * Pass {@code 0} when no instruments yet share this prefix.
     *
-    * @param prefix        the 10-character prefix as returned by {@link #buildAanschafnrPrefix}
-    * @param existingCount count of instruments (other than the current one) sharing {@code prefix}
+    * <p>Throws when the sequence is exhausted (ADR-006: no silent overflow).
+    *
+    * @param prefix the 10-character prefix as returned by {@link #buildAanschafnrPrefix}
+    * @param maxSeq the maximum sequence number already present for this prefix (0 = none)
     * @return the full aanschafnummer, e.g. {@code "C.030.526.01"}
+    * @throws IllegalStateException when {@code maxSeq + 1 > 99}
     */
-   public static String buildAanschafnr(String prefix, int existingCount)
+   public static String buildAanschafnr(String prefix, int maxSeq)
    {
-      return prefix + String.format("%02d", existingCount + 1);
+      if (maxSeq + 1 > 99)
+      {
+         throw new IllegalStateException(
+               "aanschafnr sequence exhausted (>99) for prefix " + prefix);
+      }
+      return prefix + String.format("%02d", maxSeq + 1);
    }
 
 
    /**
     * Computes the huurnummer from the 2-digit year and the max existing volgnummer this year.
     *
-    * @param twoDigitYear    current year as 2 digits (e.g. {@code 26} for 2026)
+    * <p>Throws when the volgnummer sequence is exhausted (ADR-006: no silent overflow).
+    *
+    * @param twoDigitYear          current year as 2 digits (e.g. {@code 26} for 2026)
     * @param maxVolgnummerThisYear highest volgnummer found in the DB for this year, excluding the
-    *                        current instrument; pass {@code 0} when no instruments exist this year
+    *                              current instrument; pass {@code 0} when no instruments exist
+    *                              this year
     * @return the new huurnummer, e.g. {@code 2601} for first instrument of 2026
+    * @throws IllegalStateException when {@code maxVolgnummerThisYear + 1 > 99}
     */
    public static int buildHuurnr(int twoDigitYear, int maxVolgnummerThisYear)
    {
+      if (maxVolgnummerThisYear + 1 > 99)
+      {
+         throw new IllegalStateException(
+               "huurnr volgnummer exhausted (>99) for year " + twoDigitYear);
+      }
       return twoDigitYear * 100 + (maxVolgnummerThisYear + 1);
    }
 }
