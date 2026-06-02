@@ -25,6 +25,7 @@ export const NL = {
     maxResultaten: 'Max. resultaten',
     nieuw: 'Nieuw instrument',
     geenResultaten: 'Geen instrumenten gevonden.',
+    zoekenMislukt: 'Zoeken mislukt — probeer het opnieuw.',
     kolommen: {
       huurnr: 'Huurnr',
       aanschafnr: 'Aanschafnr',
@@ -71,6 +72,7 @@ export const NL = {
     btnGenereerHuurnr: 'Genereer huurnr',
     opgeslagen: 'Instrument opgeslagen.',
     verwijderd: 'Instrument verwijderd.',
+    verwijderenMislukt: 'Verwijderen mislukt.',
     nietGevonden: 'Instrument niet gevonden.',
     aanschafnrVoorwaarde:
       'Datum in en inkoopbron zijn verplicht voor het genereren van een aanschafnr.',

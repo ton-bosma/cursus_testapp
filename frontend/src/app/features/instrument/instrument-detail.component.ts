@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -84,6 +84,9 @@ export class InstrumentDetailComponent implements OnInit {
    */
   @Input() public nested = false;
 
+  /** Emitted after a successful delete so the host can close the nested view. */
+  @Output() public readonly deleted = new EventEmitter<void>();
+
   protected readonly labels = NL.instrumentDetail;
 
   protected readonly types = signal<readonly IInstrumentType[]>([]);
@@ -157,6 +160,12 @@ export class InstrumentDetailComponent implements OnInit {
     this._service.delete$(id).subscribe({
       next: () => {
         this._snackBar.open(this.labels.verwijderd, 'OK', { duration: 3000 });
+        this.currentId.set(undefined);
+        this.form.reset();
+        this.deleted.emit();
+      },
+      error: () => {
+        this._snackBar.open(this.labels.verwijderenMislukt, 'Sluiten', { duration: 5000 });
       },
     });
   }

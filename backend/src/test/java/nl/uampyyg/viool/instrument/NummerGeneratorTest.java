@@ -86,7 +86,7 @@ class NummerGeneratorTest
    @Test
    void aanschafnr_firstInSeries()
    {
-      // no existing instruments with this prefix → count = 0 → NN = 01
+      // no existing instruments with this prefix → maxSeq = 0 → NN = 01
       String nr = NummerGenerator.buildAanschafnr("C.030.526.", 0);
 
       assertThat(nr).isEqualTo("C.030.526.01");
@@ -101,11 +101,20 @@ class NummerGeneratorTest
    }
 
    @Test
-   void aanschafnr_largeCount_zeropaddedTwoDigits()
+   void aanschafnr_largeMaxSeq_zeropaddedTwoDigits()
    {
       String nr = NummerGenerator.buildAanschafnr("C.030.526.", 9);
 
       assertThat(nr).isEqualTo("C.030.526.10");
+   }
+
+   @Test
+   void aanschafnr_throwsWhenSequenceExhausted()
+   {
+      // maxSeq = 99 → next would be 100 > 99, must throw
+      assertThatThrownBy(() -> NummerGenerator.buildAanschafnr("C.030.526.", 99))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("aanschafnr sequence exhausted");
    }
 
    // ── buildHuurnr ───────────────────────────────────────────────────────────
@@ -147,6 +156,15 @@ class NummerGeneratorTest
    void huurnr_year99_firstInstrument()
    {
       assertThat(NummerGenerator.buildHuurnr(99, 0)).isEqualTo(9901);
+   }
+
+   @Test
+   void huurnr_throwsWhenSequenceExhausted()
+   {
+      // maxVolgnummer = 99 → next would be 100 > 99, must throw
+      assertThatThrownBy(() -> NummerGenerator.buildHuurnr(26, 99))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("huurnr volgnummer exhausted");
    }
 
    // ── integration of prefix + sequence ─────────────────────────────────────

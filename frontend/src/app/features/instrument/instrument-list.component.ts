@@ -63,6 +63,7 @@ export class InstrumentListComponent {
   private readonly _router = inject(Router);
 
   protected readonly loading = signal(false);
+  protected readonly searchFailed = signal(false);
 
   /** Combined search params; recomputed whenever any input signal changes. */
   private readonly _params = computed<IInstrumentSearchParams>(() => ({
@@ -87,10 +88,12 @@ export class InstrumentListComponent {
         return this._service.search$(params).pipe(
           map((rows) => {
             this.loading.set(false);
+            this.searchFailed.set(false);
             return rows;
           }),
           catchError(() => {
             this.loading.set(false);
+            this.searchFailed.set(true);
             return of<IInstrumentRow[]>([]);
           }),
         );
@@ -102,9 +105,9 @@ export class InstrumentListComponent {
 
   protected readonly rows = computed(() => this._rows());
 
-  /** Left-pads the rental number to 4 digits, per spec. */
-  protected formatHuurnr(huurnr: number): string {
-    return String(huurnr).padStart(4, '0');
+  /** Left-pads the rental number to 4 digits, per spec. Returns '' for null. */
+  protected formatHuurnr(huurnr: number | null): string {
+    return huurnr == null ? '' : String(huurnr).padStart(4, '0');
   }
 
   protected onQueryInput(value: string): void {

@@ -10,7 +10,7 @@ export interface IInstrumentRow {
   /** Technical identifier, used for detail navigation. */
   id: number;
   /** Rental number (huurnummer); displayed left-padded to 4 digits. */
-  huurnr: number;
+  huurnr: number | null;
   /** Acquisition number (aanschafnummer). */
   aanschafnr: string;
   /** Instrument type description. */
