@@ -11,6 +11,7 @@ interface IMenuItem {
   label: string;
   icon: string;
   route: string;
+  exact?: boolean;
 }
 
 @Component({
@@ -28,11 +29,13 @@ interface IMenuItem {
     MatButtonModule,
   ],
   template: `
-    <mat-toolbar color="primary" class="app-toolbar">
-      <button mat-icon-button (click)="toggleSidenav()">
+    <mat-toolbar class="app-toolbar">
+      <button mat-icon-button (click)="toggleSidenav()" aria-label="Menu">
         <mat-icon>menu</mat-icon>
       </button>
-      <span>{{ title }}</span>
+      <span class="app-toolbar__title">
+        {{ title }}<span class="app-toolbar__mark"></span>
+      </span>
     </mat-toolbar>
 
     <mat-sidenav-container class="app-sidenav-container">
@@ -47,6 +50,7 @@ interface IMenuItem {
               mat-list-item
               [routerLink]="item.route"
               routerLinkActive="active-link"
+              [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
             >
               <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
               <span matListItemTitle>{{ item.label }}</span>
@@ -69,15 +73,39 @@ interface IMenuItem {
 
     .app-toolbar {
       flex-shrink: 0;
+      background: var(--paper);
+      color: var(--ink);
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .app-toolbar__title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 1.4rem;
+    }
+
+    .app-toolbar__mark {
+      display: inline-block;
+      width: 0.42rem;
+      height: 0.42rem;
+      margin-left: 0.4rem;
+      background: var(--vermilion);
+      vertical-align: middle;
     }
 
     .app-sidenav-container {
       flex: 1;
     }
 
+    .app-sidenav {
+      border-right: 1.5px solid var(--ink);
+    }
+
     .active-link {
-      background-color: rgba(0, 0, 0, 0.08);
-      font-weight: 500;
+      background: var(--paper-2);
+      box-shadow: inset 4px 0 0 var(--vermilion);
     }
   `],
 })
@@ -87,6 +115,7 @@ export class ShellComponent {
   protected readonly sidenavOpen = signal(true);
 
   protected readonly menuItems: IMenuItem[] = [
+    { label: NL.nav.overzicht, icon: 'dashboard', route: '/', exact: true },
     { label: NL.nav.instrumenten, icon: 'piano', route: '/instrumenten' },
     { label: NL.nav.types, icon: 'category', route: '/types' },
     { label: NL.nav.inkoopbron, icon: 'storefront', route: '/inkoopbron' },

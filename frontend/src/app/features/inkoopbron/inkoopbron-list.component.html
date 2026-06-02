@@ -1,18 +1,27 @@
-<div class="page-container">
-  <h2>{{ labels.inkoopbron.title }}</h2>
+<article class="inkoopbron-page">
 
-  <table mat-table [dataSource]="visibleRows()" class="mat-elevation-z2 inline-table">
+  <!-- ── Masthead ────────────────────────────────────────────── -->
+  <header class="ledger-head">
+    <p class="ledger-head__meta">Onderhoud · Inkoopbron</p>
+    <div class="ledger-head__row">
+      <h1 class="ledger-head__title">
+        {{ labels.inkoopbron.title }}<span class="ledger-head__title-mark"></span>
+      </h1>
+    </div>
+    <div class="ledger-rule ledger-rule--double"></div>
+  </header>
+
+  <!-- ── Inline editor table ──────────────────────────────────── -->
+  <table mat-table [dataSource]="visibleRows()" class="inline-table">
 
     <!-- Omschrijving column -->
     <ng-container matColumnDef="omschrijving">
       <th mat-header-cell *matHeaderCellDef>{{ labels.inkoopbron.colOmschrijving }}</th>
       <td mat-cell *matCellDef="let row">
-        <mat-form-field appearance="outline" class="cell-field">
-          <input matInput
-                 [(ngModel)]="row.omschrijving"
-                 [disabled]="row.markedDeleted"
-                 [attr.aria-label]="labels.inkoopbron.colOmschrijving" />
-        </mat-form-field>
+        <input class="ledger-input"
+               [(ngModel)]="row.omschrijving"
+               [disabled]="row.markedDeleted"
+               [attr.aria-label]="labels.inkoopbron.colOmschrijving" />
       </td>
     </ng-container>
 
@@ -45,13 +54,14 @@
         [class.deleted-row]="row.markedDeleted"></tr>
   </table>
 
+  <!-- ── Toolbar ───────────────────────────────────────────────── -->
   <div class="toolbar">
     <button mat-stroked-button (click)="addRow()">
-      <mat-icon>add</mat-icon>
       {{ labels.inkoopbron.btnRijToevoegen }}
     </button>
     <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
       {{ labels.inkoopbron.btnOpslaan }}
     </button>
   </div>
-</div>
+
+</article>

@@ -1,6 +1,6 @@
 # Vioolverhuur-administratie — Spec
 
-Last updated: 2026-06-02 (after PRD v1 cycle)
+Last updated: 2026-06-02 (after PRD v1 + Editorial Ledger UI cycle)
 
 ## Architecture
 
@@ -9,7 +9,7 @@ Docker Compose. The SPA calls the API over `/api/*` paths relative to its own or
 is no in-app authentication — endpoints are open and any access control is delegated to an
 external reverse proxy in front of the app (see ADR-008), which is not part of this repo.
 
-- Angular SPA (nginx container) — instrument CRUD + reference-list editors
+- Angular SPA (nginx container) — home dashboard ("Het Vioolregister"), instrument CRUD + reference-list editors, styled with a custom "Editorial Ledger" design system
 - Spring Boot API (JRE container) — business logic, number generators, jOOQ queries
 - PostgreSQL 16 (postgres:16-alpine container) — single schema, Flyway-managed
 - docker-compose orchestrates all three with named volumes for DB + file storage
@@ -129,6 +129,8 @@ IInstrumentSearchParams { q; archief; max: number|null }
 - Currency normalization directive on blur (accepts `,` or `.`); overwrite-confirm dialog via `firstValueFrom`
 - `delete()` resets form + clears `currentId` + emits `deleted` output; delete button only rendered when `nested`
 - Routes lazy-loaded via `loadComponent`; `withComponentInputBinding()` passes route `id` as `@Input`
+- Home dashboard aggregates the three list endpoints via `forkJoin` (KPIs + recent rows), with an `error` callback that clears `loading` and shows an error state (no stuck spinner)
+- "Editorial Ledger" design system in `styles.scss`: design tokens, an Angular Material retheme via `--mat-sys-*`, and `.ledger-*` / `.ledger-input` utilities reused across all screens
 
 ## Directory Structure
 
@@ -156,6 +158,7 @@ frontend/src/app/
   core/http/       error.interceptor.ts
   core/i18n/       nl.labels.ts
   shared/          currency.directive.ts, shell/shell.component.ts
+  features/dashboard/       dashboard.component.ts (home "/" — KPIs + recent + shortcuts)
   features/instrument/      instrument.model.ts, instrument.service.ts, list, detail, confirm-overwrite.dialog
   features/instrumenttype/  instrumenttype.service.ts, list
   features/inkoopbron/      inkoopbron.service.ts, list
@@ -170,4 +173,4 @@ frontend/src/app/
 - Backend env overrides: `SPRING_DATASOURCE_URL/USERNAME/PASSWORD` (from `POSTGRES_*`); `VIOOL_STORAGE_DIR=/app/storage`
 - Authentication: none in-app for v1 — endpoints are open behind an external reverse proxy; a seam is reserved for later in-app auth (ADR-008)
 - jOOQ codegen: Gradle start/wait/migrate/stop lifecycle against an ephemeral `postgres:16` container (port 15432), Flyway-migrated (V1→V2) before generation
-```
+- Dev: `frontend/proxy.conf.json` proxies `/api` → `http://localhost:8080` for `ng serve`

@@ -1,25 +1,46 @@
-.page-container {
-  padding: 24px;
-  max-width: 800px;
+// ── Host ────────────────────────────────────────────────────────
+:host {
+  display: block;
+  background: var(--paper);
+  color: var(--ink);
 }
 
+// ── Page wrapper ────────────────────────────────────────────────
+.types-page {
+  display: block;
+  max-width: 760px;
+}
+
+// ── Inline edit table ───────────────────────────────────────────
 .inline-table {
   width: 100%;
-  margin-bottom: 16px;
-
-  .cell-field {
-    width: 100%;
-    margin: 4px 0;
-  }
+  margin-bottom: 22px;
 }
 
-.deleted-row {
-  opacity: 0.4;
+// Numeric column: right-aligned header + cell (forfait accessoires)
+.head--num,
+.cell--num { text-align: right; }
+
+.cell--num .ledger-input { max-width: 150px; margin-left: auto; }
+
+// Actions column: tight, right
+.head--act,
+.cell--act {
+  width: 56px;
+  text-align: right;
+}
+
+// ── Deleted-row styling ─────────────────────────────────────────
+.row--deleted {
+  opacity: 0.45;
+  color: var(--ink-soft);
   text-decoration: line-through;
 }
 
+// ── Toolbar ─────────────────────────────────────────────────────
 .toolbar {
   display: flex;
   gap: 12px;
   align-items: center;
+  margin-top: 4px;
 }

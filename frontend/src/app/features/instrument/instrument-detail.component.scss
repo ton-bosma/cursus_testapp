@@ -1,29 +1,80 @@
+:host {
+  display: block;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+// Masthead spacing within the detail content area
+.detail-head {
+  max-width: 900px;
+}
+
 .detail {
   display: block;
   max-width: 900px;
-  padding: 1rem;
+  padding: 0 0 1rem;
 }
 
 .fields {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.5rem 1rem;
-  align-items: center;
-  padding-top: 0.5rem;
+  gap: 1rem 1.5rem;
+  align-items: end;
+  padding-top: 1rem;
 }
 
 .full-width {
   grid-column: 1 / -1;
 }
 
+// Native checkbox tinted to the ledger accent
+.ledger-field--inline input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--vermilion);
+  cursor: pointer;
+}
+
+// ── Expansion panels as ledger sections ─────────────────────────
+.mat-expansion-panel {
+  background: transparent;
+  box-shadow: none !important;
+
+  // Thin ink rule between stacked sections
+  & + .mat-expansion-panel {
+    border-top: 1px solid var(--hairline);
+  }
+}
+
+// Heavier rule under the very first panel header for a "register" feel
+.mat-accordion {
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  display: block;
+}
+
 .panel-actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .form-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1.5px solid var(--ink);
+  max-width: 900px;
+}
+
+// Subtle destructive delete — ink-soft until hover, then vermilion
+.action-delete {
+  --mdc-text-button-label-text-color: var(--ink-soft);
+  color: var(--ink-soft);
+
+  &:hover:not([disabled]) {
+    color: var(--vermilion);
+  }
 }

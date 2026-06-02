@@ -1,35 +1,344 @@
-// Angular Material theme — Material 3, v19+ API
+// ─────────────────────────────────────────────────────────────
+// Editorial Ledger — global theme
+// Angular Material M3 (v19) retheme via --mat-sys-* + ledger tokens
+// ─────────────────────────────────────────────────────────────
 @use '@angular/material' as mat;
 
-// Apply M3 theme using CSS custom properties
+// Base M3 theme. Orange is the closest prebuilt palette to our
+// vermilion; exact colours are pinned via --mat-sys-* overrides below.
 html {
   @include mat.theme((
     color: (
       theme-type: light,
-      primary: mat.$azure-palette,
-      tertiary: mat.$violet-palette,
+      primary: mat.$orange-palette,
+      tertiary: mat.$orange-palette,
     ),
-    typography: Roboto,
+    typography: Archivo,
     density: 0,
   ));
 }
 
-// Global resets
+// ── Ledger design tokens ──────────────────────────────────────
+:root {
+  --paper: #f6f4ee;
+  --paper-2: #efeae0;
+  --paper-3: #e7e1d4;
+  --ink: #1a1a17;
+  --ink-soft: #6f6a60;
+  --vermilion: #e2402a;
+  --vermilion-ink: #c0301d;
+  --rule: #1a1a17;
+  --hairline: rgba(26, 26, 23, 0.16);
+
+  --font-display: 'Big Shoulders Display', 'Archivo', sans-serif;
+  --font-body: 'Archivo', 'Helvetica Neue', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'Courier New', monospace;
+
+  // ── Retheme Angular Material to the ledger palette ──
+  --mat-sys-primary: #{'#e2402a'};
+  --mat-sys-on-primary: #fdfbf6;
+  --mat-sys-primary-container: #f7d9d1;
+  --mat-sys-on-primary-container: #4a120a;
+  --mat-sys-secondary: #1a1a17;
+  --mat-sys-on-secondary: #f6f4ee;
+  --mat-sys-tertiary: #1a1a17;
+  --mat-sys-on-tertiary: #f6f4ee;
+
+  --mat-sys-background: #f6f4ee;
+  --mat-sys-on-background: #1a1a17;
+  --mat-sys-surface: #f6f4ee;
+  --mat-sys-surface-dim: #e7e1d4;
+  --mat-sys-surface-bright: #fbfaf5;
+  --mat-sys-surface-container-lowest: #fbfaf5;
+  --mat-sys-surface-container-low: #f2eee5;
+  --mat-sys-surface-container: #efeae0;
+  --mat-sys-surface-container-high: #e7e1d4;
+  --mat-sys-surface-container-highest: #e0d9ca;
+  --mat-sys-on-surface: #1a1a17;
+  --mat-sys-on-surface-variant: #6f6a60;
+  --mat-sys-outline: rgba(26, 26, 23, 0.55);
+  --mat-sys-outline-variant: rgba(26, 26, 23, 0.18);
+
+  --mat-sys-error: #b3261e;
+  --mat-sys-on-error: #ffffff;
+
+  // square, printed feel — no rounded chrome
+  --mat-sys-corner-extra-small: 0;
+  --mat-sys-corner-small: 0;
+  --mat-sys-corner-medium: 0;
+  --mat-sys-corner-large: 0;
+}
+
+// ── Global resets ─────────────────────────────────────────────
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
 }
 
-// Shell layout
-.app-sidenav-container {
-  height: 100%;
+* { -webkit-font-smoothing: antialiased; }
+
+// ── Shell layout ──────────────────────────────────────────────
+.app-sidenav-container { height: 100%; background: var(--paper); }
+.app-sidenav { width: 232px; }
+.app-sidenav-content { padding: 22px; background: var(--paper); }
+
+// ─────────────────────────────────────────────────────────────
+// Shared ledger utilities — reused by every feature screen
+// ─────────────────────────────────────────────────────────────
+
+// Page masthead header
+.ledger-head {
+  margin-bottom: 26px;
+
+  &__meta {
+    margin: 0 0 2px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  &__row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 0.9;
+    letter-spacing: 0.005em;
+    margin: 0;
+  }
+
+  &__title-mark {
+    display: inline-block;
+    width: 0.28em;
+    height: 0.28em;
+    margin-left: 0.16em;
+    background: var(--vermilion);
+  }
 }
 
+.ledger-rule {
+  height: 1.5px;
+  background: var(--ink);
+  margin: 12px 0 0;
+}
+
+.ledger-rule--double {
+  height: 4px;
+  background: var(--ink);
+  position: relative;
+  margin-top: 10px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 7px 0 auto 0;
+    height: 1.5px;
+    background: var(--ink);
+  }
+}
+
+// Section label
+.ledger-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.92rem;
+  position: relative;
+  padding-left: 15px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    width: 7px;
+    height: 0.9em;
+    background: var(--vermilion);
+  }
+}
+
+// Mono numerals helper
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+// ── Ledger inputs — "write in the register" ───────────────────
+// Borderless, transparent fields that read as ink on paper; a thin
+// hairline turns vermilion on focus. Used app-wide (tables + forms).
+.ledger-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--hairline);
+  border-radius: 0;
+  padding: 7px 4px 6px;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: var(--ink);
+  outline: none;
+  appearance: none;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ledger-input::placeholder { color: var(--ink-soft); opacity: 0.7; }
+.ledger-input:hover:not(:disabled) { background: rgba(26, 26, 23, 0.03); }
+
+.ledger-input:focus {
+  border-bottom-color: var(--vermilion);
+  box-shadow: 0 1.5px 0 0 var(--vermilion);
+  background: var(--paper-2);
+}
+
+.ledger-input:disabled {
+  color: var(--ink-soft);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+// numeric variant — mono, right-aligned, no spinners
+.ledger-input--num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ledger-input[type='number']::-webkit-inner-spin-button,
+.ledger-input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.ledger-input[type='number'] { -moz-appearance: textfield; }
+
+// mono for date inputs so figures align like the ledger
+.ledger-input[type='date'] { font-family: var(--font-mono); }
+
+// select variant — custom ink caret, no native chrome
+select.ledger-input {
+  cursor: pointer;
+  padding-right: 26px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a1a17'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+}
+
+textarea.ledger-input {
+  resize: vertical;
+  min-height: 64px;
+}
+
+// Labeled field wrapper for forms
+.ledger-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ledger-field__label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+// inline (checkbox/boolean) field variant
+.ledger-field--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Material component polish (applies app-wide)
+// ─────────────────────────────────────────────────────────────
+
+// Buttons: square, uppercase, display font
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-button {
+  --mdc-filled-button-container-shape: 0;
+  --mdc-outlined-button-container-shape: 0;
+  --mdc-protected-button-container-shape: 0;
+  --mdc-text-button-container-shape: 0;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase;
+}
+
+// Tables: hard rules, uppercase display headers, mono-friendly cells
+.mat-mdc-table {
+  background: transparent;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+
+  .mat-mdc-header-row {
+    background: var(--paper-2);
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  .mat-mdc-header-cell {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+
+  .mat-mdc-row {
+    transition: background 0.15s ease;
+
+    &:hover { background: var(--paper-2); }
+  }
+
+  .mat-mdc-cell {
+    font-family: var(--font-body);
+    color: var(--ink);
+    border-bottom-color: var(--hairline);
+  }
+}
+
+// Form fields & selects read as ledger ink
+.mat-mdc-form-field { font-family: var(--font-body); }
+
+// Toolbar default (shell overrides further)
+.mat-toolbar {
+  font-family: var(--font-display);
+}
+
+// Sidenav nav items — uppercase ledger labels with vermilion active accent
 .app-sidenav {
-  width: 220px;
-}
+  [matListItemTitle],
+  .mdc-list-item__primary-text {
+    font-family: var(--font-display) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.96rem;
+    color: var(--ink);
+  }
 
-.app-sidenav-content {
-  padding: 16px;
+  .mat-mdc-list-item .mat-icon { color: var(--ink); }
+
+  .active-link [matListItemTitle],
+  .active-link .mdc-list-item__primary-text,
+  .active-link .mat-icon { color: var(--vermilion); }
 }
