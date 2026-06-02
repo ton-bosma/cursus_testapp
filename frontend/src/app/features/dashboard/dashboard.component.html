@@ -18,6 +18,8 @@
 
   @if (loading()) {
     <p class="loading">— registratie inladen —</p>
+  } @else if (error()) {
+    <p class="loading">{{ nl.fout }}</p>
   } @else {
     <div class="kpis">
       @for (kpi of kpis(); track kpi.label; let i = $index) {

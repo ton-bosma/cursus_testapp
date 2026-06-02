@@ -49,6 +49,7 @@ export class DashboardComponent {
   protected readonly editieJaar = new Date().getFullYear().toString();
 
   protected readonly loading = signal(true);
+  protected readonly error = signal(false);
   protected readonly kpis = signal<readonly IKpi[]>([]);
   protected readonly recent = signal<readonly IRecentRow[]>([]);
   protected readonly bronnenAantal = signal(0);
@@ -79,9 +80,15 @@ export class DashboardComponent {
       bronnen: this._bronService.getAll(),
     })
       .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((data) => {
-        this._build(data.instruments, data.types.length, data.bronnen.length);
-        this.loading.set(false);
+      .subscribe({
+        next: (data) => {
+          this._build(data.instruments, data.types.length, data.bronnen.length);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set(true);
+          this.loading.set(false);
+        },
       });
   }
 

@@ -25,6 +25,7 @@ export const NL = {
     },
     recent: 'Recent toegevoegd',
     geenRecent: 'Nog geen instrumenten geregistreerd.',
+    fout: 'Het overzicht kon niet worden geladen.',
     snel: 'Snelkoppelingen',
     linkInstrumenten: 'Alle instrumenten',
     linkNieuw: 'Nieuw instrument',
