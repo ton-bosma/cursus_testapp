@@ -1,0 +1,60 @@
+<div class="page-container">
+  <h2>{{ labels.instrumenttype.title }}</h2>
+
+  <table mat-table [dataSource]="visibleRows()" class="mat-elevation-z2 inline-table">
+
+    <!-- Omschrijving column -->
+    <ng-container matColumnDef="omschrijving">
+      <th mat-header-cell *matHeaderCellDef>{{ labels.instrumenttype.colOmschrijving }}</th>
+      <td mat-cell *matCellDef="let row">
+        <mat-form-field appearance="outline" class="cell-field">
+          <input matInput
+                 [(ngModel)]="row.omschrijving"
+                 [disabled]="row.markedDeleted"
+                 [attr.aria-label]="labels.instrumenttype.colOmschrijving" />
+        </mat-form-field>
+      </td>
+    </ng-container>
+
+    <!-- Forfait accessoires column -->
+    <ng-container matColumnDef="forfaitAccessoires">
+      <th mat-header-cell *matHeaderCellDef>{{ labels.instrumenttype.colForfaitAccessoires }}</th>
+      <td mat-cell *matCellDef="let row">
+        <mat-form-field appearance="outline" class="cell-field">
+          <input matInput
+                 type="number"
+                 [(ngModel)]="row.forfaitAccessoires"
+                 [disabled]="row.markedDeleted"
+                 [attr.aria-label]="labels.instrumenttype.colForfaitAccessoires" />
+        </mat-form-field>
+      </td>
+    </ng-container>
+
+    <!-- Actions column -->
+    <ng-container matColumnDef="acties">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-icon-button
+                color="warn"
+                (click)="deleteRow(row)"
+                [attr.aria-label]="labels.instrumenttype.btnVerwijderen">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+        [class.deleted-row]="row.markedDeleted"></tr>
+  </table>
+
+  <div class="toolbar">
+    <button mat-stroked-button (click)="addRow()">
+      <mat-icon>add</mat-icon>
+      {{ labels.instrumenttype.btnRijToevoegen }}
+    </button>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
+      {{ labels.instrumenttype.btnOpslaan }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+// Angular Material theme — Material 3, v19+ API
+@use '@angular/material' as mat;
+
+// Apply M3 theme using CSS custom properties
+html {
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$violet-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+// Global resets
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+// Shell layout
+.app-sidenav-container {
+  height: 100%;
+}
+
+.app-sidenav {
+  width: 220px;
+}
+
+.app-sidenav-content {
+  padding: 16px;
+}

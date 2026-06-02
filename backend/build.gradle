@@ -1,0 +1,206 @@
+plugins {
+   id 'org.springframework.boot'        version '3.4.5'
+   id 'io.spring.dependency-management' version '1.1.7'
+   id 'java'
+   id 'nu.studer.jooq'                  version '9.0'
+}
+
+group = 'nl.uampyyg.viool'
+version = project.findProperty('version') ?: '0.1.0'
+
+java {
+   toolchain {
+      languageVersion = JavaLanguageVersion.of(21)
+   }
+}
+
+repositories {
+   mavenCentral()
+}
+
+// ── Versions ──────────────────────────────────────────────────────────────────
+def postgresDriverVersion = '42.7.5'
+def testcontainersVersion = '1.20.6'
+def flywayVersion         = '11.8.2'
+def jooqVersion           = '3.19.22'
+
+// ── Application dependencies ───────────────────────────────────────────────────
+dependencies {
+   // Web + Actuator
+   implementation 'org.springframework.boot:spring-boot-starter-web'
+   implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+   // jOOQ (Spring Boot managed)
+   implementation 'org.springframework.boot:spring-boot-starter-jooq'
+
+   // Flyway (PostgreSQL dialect)
+   implementation "org.flywaydb:flyway-core:${flywayVersion}"
+   implementation "org.flywaydb:flyway-database-postgresql:${flywayVersion}"
+
+   // PostgreSQL driver
+   runtimeOnly "org.postgresql:postgresql:${postgresDriverVersion}"
+
+   // Testcontainers (test scope)
+   testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+   testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
+   testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+
+   // Spring test
+   testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+   // jOOQ codegen JDBC driver
+   jooqGenerator "org.postgresql:postgresql:${postgresDriverVersion}"
+}
+
+// ── Docker-based ephemeral PostgreSQL for jOOQ codegen ───────────────────────
+// Uses the Docker CLI (docker run) to avoid the docker-java API version issue
+// on Windows Docker Desktop. Fixed port 15432 avoids collision with local Postgres.
+
+def codegenPort        = 15432
+def codegenContainerId = "viool-jooq-codegen-${project.name}"
+def codegenJdbcUrl     = "jdbc:postgresql://localhost:${codegenPort}/viool_codegen"
+def codegenJdbcUser    = 'viool'
+def codegenJdbcPass    = 'viool'
+
+task startCodegenDb(type: Exec) {
+   description = 'Starts an ephemeral PostgreSQL 16 container via Docker CLI for jOOQ codegen'
+
+   // Remove any leftover container from a previous (failed) run
+   doFirst {
+      exec {
+         commandLine 'docker', 'rm', '-f', codegenContainerId
+         ignoreExitValue = true
+      }
+   }
+
+   commandLine 'docker', 'run',
+         '--detach',
+         '--name', codegenContainerId,
+         '-p', "${codegenPort}:5432",
+         '-e', "POSTGRES_DB=viool_codegen",
+         '-e', "POSTGRES_USER=${codegenJdbcUser}",
+         '-e', "POSTGRES_PASSWORD=${codegenJdbcPass}",
+         'postgres:16'
+}
+
+task waitForCodegenDb {
+   description = 'Waits until the codegen PostgreSQL container is ready to accept connections'
+   dependsOn startCodegenDb
+
+   doLast {
+      int maxWait  = 30
+      int attempts = 0
+      boolean ready = false
+      while (attempts < maxWait) {
+         def result = exec {
+            commandLine 'docker', 'exec', codegenContainerId,
+                  'pg_isready', '-U', codegenJdbcUser, '-d', 'viool_codegen'
+            ignoreExitValue = true
+         }
+         if (result.exitValue == 0) {
+            ready = true
+            logger.lifecycle("[codegen] PostgreSQL is ready after ${attempts + 1}s")
+            break
+         }
+         Thread.sleep(1000)
+         attempts++
+      }
+      if (!ready) {
+         throw new GradleException("Timed out waiting for codegen PostgreSQL to start")
+      }
+   }
+}
+
+task migrateCodegenDb {
+   description = 'Applies Flyway migrations to the codegen PostgreSQL container via psql'
+   dependsOn waitForCodegenDb
+
+   doLast {
+      // Copy migration SQL into the container and run it with psql
+      def migrationDir = "${projectDir}/src/main/resources/db/migration"
+      def sqlFiles = fileTree(migrationDir).include('*.sql').sort { it.name }
+      sqlFiles.each { sqlFile ->
+         logger.lifecycle("[codegen] Applying migration: ${sqlFile.name}")
+         exec {
+            commandLine 'docker', 'exec', '-i', codegenContainerId,
+                  'psql',
+                  "-U${codegenJdbcUser}",
+                  "-d", 'viool_codegen',
+                  '-f', '-'
+            standardInput = sqlFile.newInputStream()
+         }
+      }
+      logger.lifecycle('[codegen] Migrations applied.')
+   }
+}
+
+task stopCodegenDb(type: Exec) {
+   description = 'Stops and removes the codegen PostgreSQL container'
+   commandLine 'docker', 'rm', '-f', codegenContainerId
+   ignoreExitValue = true
+}
+
+// ── jOOQ codegen plugin configuration ────────────────────────────────────────
+jooq {
+   version = jooqVersion
+
+   configurations {
+      main {
+         generateSchemaSourceOnCompilation = true
+
+         generationTool {
+            logging = org.jooq.meta.jaxb.Logging.WARN
+
+            jdbc {
+               driver   = 'org.postgresql.Driver'
+               url      = codegenJdbcUrl
+               user     = codegenJdbcUser
+               password = codegenJdbcPass
+            }
+
+            generator {
+               name = 'org.jooq.codegen.DefaultGenerator'
+
+               database {
+                  name        = 'org.jooq.meta.postgres.PostgresDatabase'
+                  inputSchema = 'public'
+                  includes    = '.*'
+                  excludes    = 'flyway_schema_history'
+               }
+
+               generate {
+                  daos           = false
+                  records        = true
+                  immutablePojos = false
+                  fluentSetters  = true
+               }
+
+               target {
+                  packageName = 'nl.uampyyg.viool.jooq'
+                  directory   = "${buildDir}/generated-sources/jooq"
+               }
+            }
+         }
+      }
+   }
+}
+
+// Wire ordering: migrate → generateJooq → stop
+afterEvaluate {
+   tasks.named('generateJooq').configure {
+      dependsOn migrateCodegenDb
+      finalizedBy stopCodegenDb
+   }
+}
+
+// ── Test configuration ────────────────────────────────────────────────────────
+test {
+   useJUnitPlatform()
+
+   // On Windows Docker Desktop the real Linux engine is at docker_engine_linux.
+   // docker-java 3.4.x defaults to API version 1.32 which Docker 29.x rejects
+   // (minimum is 1.40). Setting API_VERSION (docker-java property) to 1.47
+   // makes docker-java request /v1.47/... which the engine accepts.
+   environment 'DOCKER_HOST',  'npipe:////./pipe/docker_engine_linux'
+   environment 'API_VERSION',  '1.47'
+}

@@ -1,0 +1,25 @@
+.page-container {
+  padding: 24px;
+  max-width: 800px;
+}
+
+.inline-table {
+  width: 100%;
+  margin-bottom: 16px;
+
+  .cell-field {
+    width: 100%;
+    margin: 4px 0;
+  }
+}
+
+.deleted-row {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}

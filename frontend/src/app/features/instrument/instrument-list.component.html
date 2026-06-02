@@ -1,0 +1,112 @@
+<section class="instrument-list">
+  <header class="instrument-list__header">
+    <h1 class="instrument-list__title">{{ labels.title }}</h1>
+    <button
+      mat-fab
+      color="primary"
+      type="button"
+      [attr.aria-label]="labels.nieuw"
+      [matTooltip]="labels.nieuw"
+      (click)="openNew()"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  </header>
+
+  <form class="instrument-list__filters" (submit)="$event.preventDefault()">
+    <mat-form-field class="instrument-list__search" appearance="outline">
+      <mat-label>{{ labels.zoekLabel }}</mat-label>
+      <input
+        matInput
+        type="search"
+        [value]="query()"
+        [placeholder]="labels.zoekPlaceholder"
+        (input)="onQueryInput($any($event.target).value)"
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-checkbox
+      [checked]="toonArchief()"
+      (change)="onArchiefChange($event.checked)"
+    >
+      {{ labels.toonArchief }}
+    </mat-checkbox>
+
+    <mat-form-field class="instrument-list__max" appearance="outline">
+      <mat-label>{{ labels.maxResultaten }}</mat-label>
+      <mat-select
+        [value]="maxResults()"
+        (selectionChange)="onMaxChange($event.value)"
+      >
+        @for (option of maxOptions; track option.label) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </form>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div class="instrument-list__table-wrapper">
+    <table mat-table [dataSource]="rows()" class="instrument-list__table">
+      <ng-container matColumnDef="huurnr">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.huurnr }}</th>
+        <td mat-cell *matCellDef="let row">{{ formatHuurnr(row.huurnr) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="aanschafnr">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.aanschafnr }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.aanschafnr }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.type }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.type }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="maat">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.maat }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.maat }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="inkoopAdres">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.inkoopAdres }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.inkoopAdres }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="verkoopAdres">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.verkoopAdres }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.verkoopAdres }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="aanschafdatum">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.aanschafdatum }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.aanschafdatum | date: 'dd-MM-yyyy' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="verkoopdatum">
+        <th mat-header-cell *matHeaderCellDef>{{ labels.kolommen.verkoopdatum }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.verkoopdatum | date: 'dd-MM-yyyy' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="instrument-list__row"
+        (click)="openDetail(row)"
+      ></tr>
+    </table>
+
+    @if (!loading() && rows().length === 0) {
+      @if (searchFailed()) {
+        <p class="instrument-list__empty">{{ labels.zoekenMislukt }}</p>
+      } @else {
+        <p class="instrument-list__empty">{{ labels.geenResultaten }}</p>
+      }
+    }
+  </div>
+</section>

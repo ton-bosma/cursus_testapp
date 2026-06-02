@@ -1,0 +1,7 @@
+# Test profile — datasource is overridden at runtime by AbstractIntegrationTest
+# after the Testcontainers PostgreSQL container has started.
+spring:
+  flyway:
+    enabled: false   # Flyway is run programmatically in AbstractIntegrationTest
+  jooq:
+    sql-dialect: POSTGRES
